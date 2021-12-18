@@ -3,7 +3,7 @@
     @if ($popupForm)
     <x-dialog-modal wire:model="popupForm" maxWidth="2xl">
         <x-slot name="content">
-            @includeIf($actions['form'])
+            @includeIf($actions['view_form'])
         </x-slot>
 
         <x-slot name="footer">
@@ -12,7 +12,7 @@
                     <div>
                         @if($confirm)
                             <x-button danger wire:click="delete">삭제</x-button>
-                            << 정말로 삭제할까요?
+                            <span>정말로 삭제할까요?</span>
                         @else
                             <x-button secondary wire:click="deleteConfirm">삭제</x-button>
                         @endif

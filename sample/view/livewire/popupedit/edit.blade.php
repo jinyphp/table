@@ -21,11 +21,7 @@
         </x-row>
         <!-- end page title -->
 
-        <x-row>
-            <x-col>
-                @livewire('HrForm', ['actions'=>$actions])
-            </x-col>
-        </x-row>
+        @livewire('WireForm', ['actions'=>$actions])
 
     </x-theme-layout>
 </x-theme>

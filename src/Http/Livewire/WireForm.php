@@ -5,6 +5,8 @@ namespace Jiny\Table\Http\Livewire;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 
+use Illuminate\Support\Facades\Validator;
+
 class WireForm extends Component
 {
     public $actions;
@@ -22,50 +24,56 @@ class WireForm extends Component
 
     public function render()
     {
-
         if (isset($this->actions['id'])) {
             $form = DB::table($this->actions['table'])->find($this->actions['id']);
             foreach ($form as $key => $value) {
                 $this->form[$key] = $value;
             }
         }
-        return view($this->actions['form']);
+
+        return view("jinytable::livewire.form");
     }
 
 
     public function submit()
     {
-
         if (isset($this->actions['id'])) {
-            $this->updateSubmit();
+            $this->update();
         } else {
-            $this->createSubmit();
+            $this->store();
         }
 
-
-        if ($this->back) {
-            return redirect()->route($this->actions['routename'].'.index');
-        }
-
+        $this->goToIndex();
     }
 
 
-    public function createSubmit()
+    public function store()
     {
+        //유효성 검사
+        if (isset($this->actions['validate'])) {
+            $validator = Validator::make($this->form, $this->actions['validate'])->validate();
+        }
+
         $this->form['created_at'] = date("Y-m-d H:i:s");
         $this->form['updated_at'] = date("Y-m-d H:i:s");
+
         $id = DB::table($this->actions['table'])->insertGetId($this->form);
+
         $this->form = [];
     }
 
-    public function updateSubmit()
+    public function update()
     {
+        //유효성 검사
+        if (isset($this->actions['validate'])) {
+            $validator = Validator::make($this->form, $this->actions['validate'])->validate();
+        }
+
         DB::table($this->actions['table'])
         ->where('id', $this->actions['id'])
         ->update($this->form);
 
         $this->form = [];
-
     }
 
     public function clear()
@@ -73,13 +81,29 @@ class WireForm extends Component
         $this->form = [];
     }
 
+    /**
+     * 데이터 삭제
+     */
+
+    public $confirm = false;
+
+    public function deleteConfirm()
+    {
+        $this->confirm = true;
+    }
+
     public function delete()
     {
         DB::table($this->actions['table'])->where('id', $this->actions['id'])
             ->delete();
 
+        $this->goToIndex();
+    }
+
+    private function goToIndex()
+    {
         if ($this->back) {
-            return redirect()->route($this->actions['routename'].'.index')->with('message',"자료가 삭제되었습니다.");
+            return redirect()->route($this->actions['routename'].'.index');
         }
     }
 

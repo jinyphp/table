@@ -45,9 +45,10 @@
         </script>
         @endpush
 
+        @livewire('WireTable', ['actions'=>$actions])
 
-        @livewire('Popup-LiveTable', ['actions'=>$actions])
         @livewire('Popup-LiveForm', ['actions'=>$actions])
+
         @livewire('Popup-LiveManual')
 
 

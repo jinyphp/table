@@ -14,7 +14,7 @@ class JinyTableServiceProvider extends ServiceProvider
     public function boot()
     {
         // 모듈: 라우트 설정
-        //$this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../resources/views', $this->package);
 
         // 팝업 Dialog
@@ -37,12 +37,17 @@ class JinyTableServiceProvider extends ServiceProvider
     {
         /* 라이브와이어 컴포넌트 등록 */
         $this->app->afterResolving(BladeCompiler::class, function () {
-            // AlpineJS 를 이용항 팝업
-            Livewire::component('Popup-LiveTable', \Jiny\Table\Http\Livewire\PopupTable::class);
+            // AlpineJS 를 이용항 Table
+            Livewire::component('WireTable', \Jiny\Table\Http\Livewire\WireTable::class);
+
+            // 페이지 이동
+            Livewire::component('WireForm', \Jiny\Table\Http\Livewire\WireForm::class);
+
+            // 팝업형
             Livewire::component('Popup-LiveForm', \Jiny\Table\Http\Livewire\PopupForm::class);
             Livewire::component('Popup-LiveManual', \Jiny\Table\Http\Livewire\PopupManual::class);
 
-            Livewire::component('WireForm', \Jiny\Table\Http\Livewire\WireForm::class);
+
         });
     }
 

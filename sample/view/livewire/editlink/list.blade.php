@@ -1,50 +1,13 @@
 <div>
-    <!-- 검색 필터 -->
+
+    <!-- Filter -->
     <x-card>
         <x-card-body>
-            <x-row>
-                <x-col-6 class="mx-auto">
-                    <x-row>
-                        <x-col-6>
-                            <x-form-hor>
-                                <x-form-label>부서명</x-form-label>
-                                <x-form-item>
-                                    {!! xInputText()
-                                        ->setWire('model.defer',"filter.name")
-                                        ->setWidth("small")
-                                    !!}
-                                </x-form-item>
-                            </x-form-hor>
-                        </x-col-6>
-                        <x-col-6>
-                            <x-form-hor>
-                                <x-form-label>관리자</x-form-label>
-                                <x-form-item>
-                                    {!! xInputText()
-                                        ->setWire('model.defer',"filter.manager")
-                                        ->setWidth("small")
-                                    !!}
-                                </x-form-item>
-                            </x-form-hor>
-                        </x-col-6>
-                    </x-row>
-                </x-col-6>
-            </x-row>
 
-            <x-row>
-                <x-col-6 class="pt-3 mx-auto text-center border-t">
-                    <x-button primary wire:click="filter_search">검색</x-button>
-                    <x-button primary wire:click="filter_reset">취소</x-button>
-                </x-col-6>
-            </x-row>
         </x-card-body>
     </x-card>
 
-    @if (session()->has('message'))
-        <div class="alert alert-success">{{session('message')}}</div>
-    @endif
 
-    <!-- 데이터 목록 -->
     <x-card>
         <x-card-header>
             {{-- 페이징 --}}
@@ -60,13 +23,12 @@
                 <thead>
                     <tr>
                         <th width='20'>
-                            <input type='checkbox' class="form-check-input"
-                            wire:model="selectedall">
+                            <input type='checkbox' class="form-check-input" wire:model="selectedall">
                         </th>
-                        <th width='100'>국가</th>
-                        <th>부서명</th>
+
+                        <th width='100'>직급</th>
                         <th width='100'>사원수</th>
-                        <th width='200'>관리자</th>
+                        <th>메모</th>
 
                         <th width='200'>등록일자</th>
                     </tr>
@@ -81,31 +43,28 @@
                     @else
                     <tr>
                     @endif
-
                         <td width='20'>
                             <input type='checkbox' name='ids' value="{{$item->id}}"
                             class="form-check-input"
                             wire:model="selected">
                         </td>
 
-                        <td width='100'>{{$item->country}}</td>
-                        <td>
+                        <td width='100'>
+                            {{--
                             @if($item->enable)
-                                <a href="javascript: void(0);"
-                                    wire:click="$emit('edit','{{$item->id}}')">{{$item->name}}</a>
+                                <a href="{{route($actions['routename'].".edit", $item->id)}}">{{$item->name}}</a>
                             @else
-                                <a href="javascript: void(0);"
-                                    wire:click="$emit('edit','{{$item->id}}')">
+                                <a href="{{route($actions['routename'].".edit", $item->id)}}">
                                     <span style="text-decoration:line-through;">
                                     {{$item->name}}
                                     </span>
                                 </a>
                             @endif
+                            --}}
+                            {!! $editLink($item, $item->name) !!}
                         </td>
                         <td width='100'></td>
-                        <td width='200'>
-                            {{_getValue($item->manager)}}
-                        </td>
+                        <td></td>
 
                         <td width='200'>{{$item->created_at}}</td>
                     </tr>
@@ -115,6 +74,8 @@
                 @endif
                 </tbody>
             </x-datatable>
+
+
         </x-card-body>
 
         <x-card-footer>
@@ -137,19 +98,12 @@
         </x-card-footer>
     </x-card>
 
-
     {{-- 선택삭제 --}}
     @if ($popupDelete)
         <x-dialog-modal wire:model="popupDelete" maxWidth="2xl">
 
             <x-slot name="content">
                 <p class="p-8">정말로 삭제할까요?</p>
-
-                {{--
-                @foreach ($selected as $item)
-                    {{$item}}
-                @endforeach
-                --}}
 
             </x-slot>
 
@@ -160,4 +114,10 @@
         </x-dialog-modal>
     @endif
 
+
 </div>
+
+
+
+
+
