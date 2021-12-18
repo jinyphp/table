@@ -20,6 +20,13 @@
         "files" : [
             "src/Helpers/Helper.php"
         ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Jiny\\Table\\JinyTableServiceProvider"
+            ]
+        }
     }
 
 }

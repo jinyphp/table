@@ -17,8 +17,13 @@ class JinyTableServiceProvider extends ServiceProvider
         //$this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../resources/views', $this->package);
 
+        // 팝업 Dialog
         Blade::component($this->package.'::components.'.'dialog-modal', 'dialog-modal');
         Blade::component($this->package.'::components.'.'modal', 'modal');
+
+
+        // 테이블 컴포넌트...
+        Blade::component($this->package.'::components.'.'table-filter', 'table-filter');
 
         Blade::component($this->package.'::components.'.'datatable', 'datatable');
         Blade::component($this->package.'::components.'.'data-delete', 'datatable.check-delete');

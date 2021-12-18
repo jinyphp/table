@@ -10,12 +10,13 @@ use Illuminate\Support\Facades\Validator;
 
 class PopupManual extends Component
 {
+
     /**
      * LivePopupManual with AlpineJS
      */
     public function render()
     {
-        return view("jinytable::popup-manual");
+        return view("jinytable::livewire.popup.manual");
     }
 
     /**

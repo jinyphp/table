@@ -18,7 +18,7 @@ class PopupForm extends Component
 
     public function render()
     {
-        return view("jinytable::popup-form");
+        return view("jinytable::livewire.popup.form");
     }
 
     /**

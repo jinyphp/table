@@ -3,7 +3,7 @@
     @if ($popupForm)
     <x-dialog-modal wire:model="popupForm" maxWidth="2xl">
         <x-slot name="content">
-            @include($actions['form'])
+            @includeIf($actions['form'])
         </x-slot>
 
         <x-slot name="footer">

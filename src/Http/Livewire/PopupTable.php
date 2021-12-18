@@ -13,7 +13,6 @@ class PopupTable extends Component
 
     public $ids = [];
     public $data=[];
-    //public $links=[];
 
     /**
      * LiveListTable
@@ -31,7 +30,7 @@ class PopupTable extends Component
             $DB->where($key,'like','%'.$filter.'%');
         }
 
-        $rows = $DB->orderBy('id',"desc")->paginate($this->paging);//->get();
+        $rows = $DB->orderBy('id',"desc")->paginate($this->paging);
 
         $this->data = [];
         foreach($rows as $i => $item) {
@@ -45,9 +44,7 @@ class PopupTable extends Component
             $this->ids[$i] = $item['id'];
         }
 
-        //$this->reflash = false;
         //session()->flash('message',"데이터...");
-
         return $rows;
     }
 
@@ -58,21 +55,17 @@ class PopupTable extends Component
         $this->selectedall = false;
         $this->selected = [];
 
-        //$this->reflash = true; // 데이터 조회
         //session()->flash('message',"데이터 검색");
     }
 
     public function filter_reset()
     {
         $this->filter = [];
-        //$this->reflash = true; // 데이터 조회
     }
 
     protected $listeners = ['refeshTable'];
-    public $reflash = true;
     public function refeshTable()
     {
-        //$this->reflash = true; // 데이터 조회
     }
 
     /**
