@@ -41,6 +41,8 @@ class JinyTableServiceProvider extends ServiceProvider
             Livewire::component('Popup-LiveTable', \Jiny\Table\Http\Livewire\PopupTable::class);
             Livewire::component('Popup-LiveForm', \Jiny\Table\Http\Livewire\PopupForm::class);
             Livewire::component('Popup-LiveManual', \Jiny\Table\Http\Livewire\PopupManual::class);
+
+            Livewire::component('WireForm', \Jiny\Table\Http\Livewire\WireForm::class);
         });
     }
 

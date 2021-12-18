@@ -97,6 +97,13 @@ class PopupTable extends Component
         }
     }
 
+    // Livewire Hook
+    public function updatedPaging($value)
+    {
+        $this->selectedall = false;
+        $this->selected = [];
+    }
+
     /**
      * 선택삭제 팝업창
      */
