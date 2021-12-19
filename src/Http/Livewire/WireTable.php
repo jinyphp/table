@@ -4,9 +4,12 @@ namespace Jiny\Table\Http\Livewire;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
+use Livewire\WithPagination;
 
 class WireTable extends Component
 {
+    use WithPagination;
+
     public $actions;
     public $paging = 10;
 
@@ -14,14 +17,7 @@ class WireTable extends Component
     public $ids = [];
     public $data=[];
 
-    private $controller;
-    public function mount()
-    {
-        // wire conntect
-        if(isset($this->actions['controller'])) {
-            $this->controller = $this->actions['controller']::getInstance($this);
-        }
-    }
+
 
     /**
      * LiveListTable
@@ -31,9 +27,15 @@ class WireTable extends Component
         $rows = $this->dbFetch();
 
         // 컨트롤러 메서드 호출
-        if(method_exists($this->actions['controller'], "HookIndexed")) {
-            $rows = $this->controller->hookIndexed($rows);
+        if(isset($this->actions['controller'])) {
+            $controller = $this->actions['controller']::getInstance($this);
+            if(method_exists($controller, "HookIndexed")) {
+                $controller->hookIndexed($rows);
+            }
         }
+
+
+
 
         // 내부함수 생성
         // 팝업창 폼을 활성화 합니다.

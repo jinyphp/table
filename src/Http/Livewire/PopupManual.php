@@ -11,14 +11,7 @@ use Illuminate\Support\Facades\Validator;
 class PopupManual extends Component
 {
     public $actions;
-    private $controller;
-    public function mount()
-    {
-        // wire conntect
-        if(isset($this->actions['controller'])) {
-            $this->controller = $this->actions['controller']::getInstance($this);
-        }
-    }
+
 
     /**
      * LivePopupManual with AlpineJS

@@ -16,23 +16,33 @@ class WireForm extends Component
     public $form=[];
 
 
-
-    private $controller;
-    public function mount()
-    {
-        // wire conntect
-        if(isset($this->actions['controller'])) {
-            $this->controller = $this->actions['controller']::getInstance($this);
-        }
-    }
-
     public function render()
     {
         if (isset($this->actions['id'])) {
+            // 수정
             $form = DB::table($this->actions['table'])->find($this->actions['id']);
             foreach ($form as $key => $value) {
                 $this->form[$key] = $value;
             }
+
+            // 컨트롤러 메서드 호출
+            if(isset($this->actions['controller'])) {
+                $controller = $this->actions['controller']::getInstance($this);
+                if(method_exists($controller, "hookEdited")) {
+                    $this->form = $controller->hookEdited($this->form);
+                }
+            }
+
+        } else {
+            // 생성
+            // 컨트롤러 메서드 호출
+            if(isset($this->actions['controller'])) {
+                $controller = $this->actions['controller']::getInstance($this);
+                if(method_exists($controller, "hookCreated")) {
+                    $controller->hookCreated();
+                }
+            }
+
         }
 
         return view("jinytable::livewire.form");
@@ -61,6 +71,18 @@ class WireForm extends Component
         $this->form['created_at'] = date("Y-m-d H:i:s");
         $this->form['updated_at'] = date("Y-m-d H:i:s");
 
+        // 컨트롤러 메서드 호출
+        if(isset($this->actions['controller'])) {
+            $controller = $this->actions['controller']::getInstance($this);
+            if(method_exists($controller, "hookStored")) {
+                $form = $controller->hookStored($this->form);
+            } else {
+                $form = $this->form;
+            }
+        } else {
+            $form = $this->form;
+        }
+
         $id = DB::table($this->actions['table'])->insertGetId($this->form);
 
         $this->form = [];
@@ -71,6 +93,15 @@ class WireForm extends Component
         //유효성 검사
         if (isset($this->actions['validate'])) {
             $validator = Validator::make($this->form, $this->actions['validate'])->validate();
+        }
+
+        // 컨트롤러 메서드 호출
+        if(isset($this->actions['controller'])) {
+            $controller = $this->actions['controller']::getInstance($this);
+            if(method_exists($controller, "hookUpdated")) {
+                //dd($controller);
+                $this->form = $controller->hookUpdated($this->form);
+            }
         }
 
         DB::table($this->actions['table'])
@@ -98,6 +129,14 @@ class WireForm extends Component
 
     public function delete()
     {
+        // 컨트롤러 메서드 호출
+        if(isset($this->actions['controller'])) {
+            $controller = $this->actions['controller']::getInstance($this);
+            if(method_exists($controller, "hookDeleted")) {
+                $controller->hookDeleted();
+            }
+        }
+
         DB::table($this->actions['table'])->where('id', $this->actions['id'])
             ->delete();
 
