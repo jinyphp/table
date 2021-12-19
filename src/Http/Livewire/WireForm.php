@@ -17,9 +17,13 @@ class WireForm extends Component
 
 
 
+    private $controller;
     public function mount()
     {
-
+        // wire conntect
+        if(isset($this->actions['controller'])) {
+            $this->controller = $this->actions['controller']::getInstance($this);
+        }
     }
 
     public function render()

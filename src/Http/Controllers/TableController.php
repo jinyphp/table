@@ -12,6 +12,29 @@ use Illuminate\Support\Facades\Auth;
 
 class TableController extends Controller
 {
+    protected $actions = [];
+
+    public function __construct()
+    {
+        ## 라우트이름
+        $routename = Route::currentRouteName();
+        $this->actions['routename'] = substr($routename,0,strrpos($routename,'.'));
+    }
+
+    protected function setVisit($obj)
+    {
+        $this->actions['controller'] = $obj::class;
+        self::$Instance = $obj;
+    }
+
+    protected static $Instance;
+    protected $wire;
+    public static function getInstance($wire)
+    {
+        self::$Instance->wire = $wire;
+        return self::$Instance;
+    }
+
     public function index(Request $request)
     {
         return view("jinytable::table",[

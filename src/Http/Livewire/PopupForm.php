@@ -16,6 +16,15 @@ class PopupForm extends Component
     public $actions;
     public $form=[];
 
+    private $controller;
+    public function mount()
+    {
+        // wire conntect
+        if(isset($this->actions['controller'])) {
+            $this->controller = $this->actions['controller']::getInstance($this);
+        }
+    }
+
     public function render()
     {
         return view("jinytable::livewire.popup.form");
@@ -48,6 +57,11 @@ class PopupForm extends Component
      */
     public function create()
     {
+        // 컨트롤러 메서드 호출
+        if(method_exists($this->actions['controller'], "hookCreated")) {
+            $this->controller->hookCreated();
+        }
+
         unset($this->actions['id']);
 
         // 입력데이터 초기화
@@ -67,8 +81,15 @@ class PopupForm extends Component
         $this->form['created_at'] = date("Y-m-d H:i:s");
         $this->form['updated_at'] = date("Y-m-d H:i:s");
 
+        // 컨트롤러 메서드 호출
+        if(method_exists($this->actions['controller'], "hookStored")) {
+            $form = $this->controller->hookStored($this->form);
+        } else {
+            $form = $this->form;
+        }
+
         // 데이터 삽입
-        $id = DB::table($this->actions['table'])->insertGetId($this->form);
+        $id = DB::table($this->actions['table'])->insertGetId($form);
 
         // 입력데이터 초기화
         $this->cancel();
@@ -93,6 +114,11 @@ class PopupForm extends Component
         if (isset($this->actions['id'])) {
             $row = DB::table($this->actions['table'])->find($this->actions['id']);
             $this->setForm($row);
+
+            // 컨트롤러 메서드 호출
+            if(method_exists($this->actions['controller'], "hookEdited")) {
+                $this->form = $this->controller->hookEdited($this->form);
+            }
         }
     }
 
@@ -108,6 +134,11 @@ class PopupForm extends Component
         //유효성 검사
         if (isset($this->actions['validate'])) {
             $validator = Validator::make($this->form, $this->actions['validate'])->validate();
+        }
+
+        // 컨트롤러 메서드 호출
+        if(method_exists($this->actions['controller'], "hookUpdated")) {
+            $this->form = $this->controller->hookUpdated($this->form);
         }
 
         // 데이터 수정
@@ -144,6 +175,11 @@ class PopupForm extends Component
 
     public function delete()
     {
+        // 컨트롤러 메서드 호출
+        if(method_exists($this->actions['controller'], "hookDeleted")) {
+            $this->controller->hookDeleted();
+        }
+
         // 데이터 삭제
         DB::table($this->actions['table'])
             ->where('id', $this->actions['id'])

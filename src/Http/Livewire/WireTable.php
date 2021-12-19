@@ -14,12 +14,26 @@ class WireTable extends Component
     public $ids = [];
     public $data=[];
 
+    private $controller;
+    public function mount()
+    {
+        // wire conntect
+        if(isset($this->actions['controller'])) {
+            $this->controller = $this->actions['controller']::getInstance($this);
+        }
+    }
+
     /**
      * LiveListTable
      */
     public function render()
     {
         $rows = $this->dbFetch();
+
+        // 컨트롤러 메서드 호출
+        if(method_exists($this->actions['controller'], "HookIndexed")) {
+            $rows = $this->controller->hookIndexed($rows);
+        }
 
         // 내부함수 생성
         // 팝업창 폼을 활성화 합니다.
@@ -55,13 +69,6 @@ class WireTable extends Component
             'popupEdit'=>$funcEditPopup,
             'editLink'=>$funcEditLink
         ]);
-        /*
-        return view($this->actions['list'],[
-            'rows'=>$rows,
-            'popupEdit'=>$funcEditPopup,
-            'editLink'=>$funcEditLink
-        ]);
-        */
     }
 
     private function dbFetch()
