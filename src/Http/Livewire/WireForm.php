@@ -83,7 +83,7 @@ class WireForm extends Component
             $form = $this->form;
         }
 
-        $id = DB::table($this->actions['table'])->insertGetId($this->form);
+        $id = DB::table($this->actions['table'])->insertGetId($form);
 
         $this->form = [];
     }

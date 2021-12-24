@@ -91,10 +91,10 @@ class PopupForm extends Component
             $form = $this->form;
         }
 
-
-
         // 데이터 삽입
-        $id = DB::table($this->actions['table'])->insertGetId($form);
+        if($form) {
+            $id = DB::table($this->actions['table'])->insertGetId($form);
+        }
 
         // 입력데이터 초기화
         $this->cancel();
@@ -114,11 +114,16 @@ class PopupForm extends Component
     public function edit($id)
     {
         $this->popupFormOpen();
-        $this->actions['id'] = $id;
+
+        if($id) {
+            $this->actions['id'] = $id;
+        }
 
         if (isset($this->actions['id'])) {
             $row = DB::table($this->actions['table'])->find($this->actions['id']);
             $this->setForm($row);
+
+            //dd($this->form);
 
             // 컨트롤러 메서드 호출
             if(isset($this->actions['controller'])) {
@@ -154,9 +159,11 @@ class PopupForm extends Component
         }
 
         // 데이터 수정
-        DB::table($this->actions['table'])
-        ->where('id', $this->actions['id'])
-        ->update($this->form);
+        if($this->form) {
+            DB::table($this->actions['table'])
+                ->where('id', $this->actions['id'])
+                ->update($this->form);
+        }
 
         // 입력데이터 초기화
         $this->cancel();

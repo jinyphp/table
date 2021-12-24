@@ -23,9 +23,18 @@ class JinyTableServiceProvider extends ServiceProvider
 
 
         // 테이블 컴포넌트...
+        Blade::component($this->package.'::components.'.'datatable', 'datatable');
+        Blade::component($this->package.'::components.'.'datatable', 'data-table');
+        Blade::component(\Jiny\Table\View\Components\DataTableThead::class, "datatable-thead");
+        Blade::component(\Jiny\Table\View\Components\DataTableThead::class, "data-table-thead");
+
+        Blade::component(\Jiny\Table\View\Components\DataTableTr::class, "datatable-tr");
+        Blade::component(\Jiny\Table\View\Components\DataTableTr::class, "data-table-tr");
+
+
         Blade::component($this->package.'::components.'.'table-filter', 'table-filter');
 
-        Blade::component($this->package.'::components.'.'datatable', 'datatable');
+
         Blade::component($this->package.'::components.'.'data-delete', 'datatable.check-delete');
 
         Blade::component($this->package.'::components.'.'liveform', 'live-form');
@@ -43,10 +52,17 @@ class JinyTableServiceProvider extends ServiceProvider
             // 페이지 이동
             Livewire::component('WireForm', \Jiny\Table\Http\Livewire\WireForm::class);
 
+            // Form => json 저장
+            Livewire::component('WireConfig', \Jiny\Table\Http\Livewire\WireConfig::class);
+
             // 팝업형
             Livewire::component('Popup-LiveForm', \Jiny\Table\Http\Livewire\PopupForm::class);
             Livewire::component('Popup-LiveManual', \Jiny\Table\Http\Livewire\PopupManual::class);
 
+            // 데쉬보드
+            Livewire::component('WireDashBoard', \Jiny\Table\Http\Livewire\WireDashBoard::class);
+
+            Livewire::component('setActionRule', \Jiny\Table\Http\Livewire\SetActionRule::class);
 
         });
     }

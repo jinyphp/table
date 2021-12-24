@@ -16,15 +16,22 @@ class WireTable extends Component
     public $filter=[];
     public $ids = [];
     public $data=[];
+    public $sort=[];
 
-
+    public function mount()
+    {
+        // 페이징 초기화
+        if (isset($this->actions['paging'])) {
+            $this->paging = $this->actions['paging'];
+        }
+    }
 
     /**
      * LiveListTable
      */
     public function render()
     {
-        $rows = $this->dbFetch();
+        $rows = $this->dbFetch($this->actions);
 
         // 컨트롤러 메서드 호출
         if(isset($this->actions['controller'])) {
@@ -34,9 +41,6 @@ class WireTable extends Component
             }
         }
 
-
-
-
         // 내부함수 생성
         // 팝업창 폼을 활성화 합니다.
         $funcEditPopup = function ($item, $title)
@@ -44,11 +48,14 @@ class WireTable extends Component
             $link = xLink($title)->setHref("javascript: void(0);");
             $link->setAttribute("wire:click", "$"."emit('edit','".$item->id."')");
 
-            if($item->enable) {
-                return $link;
-            } else {
-                return xSpan($link)->style("text-decoration:line-through;");
+            if (isset($item->enable)) {
+                if($item->enable) {
+                    return $link;
+                } else {
+                    return xSpan($link)->style("text-decoration:line-through;");
+                }
             }
+
             return $link;
         };
 
@@ -66,6 +73,7 @@ class WireTable extends Component
             return $link;
         };
 
+
         return view("jinytable::livewire.table",[
             'rows'=>$rows,
             'popupEdit'=>$funcEditPopup,
@@ -73,7 +81,7 @@ class WireTable extends Component
         ]);
     }
 
-    private function dbFetch()
+    private function dbFetch($actions)
     {
         // 테이블 설정
         $DB = DB::table($this->actions['table']);
@@ -90,7 +98,22 @@ class WireTable extends Component
             $DB->where($key,'like','%'.$filter.'%');
         }
 
-        $rows = $DB->orderBy('id',"desc")->paginate($this->paging);
+        // Sort
+        if (empty($this->sort)) {
+            $DB->orderBy('id',"desc");
+        } else {
+            foreach($this->sort as $key => $value) {
+                $DB->orderBy($key, $value);
+            }
+        }
+
+        // 최종 데이터 읽기
+        // 페이징이 없는 경우, 전체 읽기
+        if(isset($this->paging) && is_numeric($this->paging) ) {
+            $rows = $DB->paginate($this->paging);
+        } else {
+            $rows = $DB->get();
+        }
 
         $this->data = [];
         foreach($rows as $i => $item) {
@@ -108,6 +131,34 @@ class WireTable extends Component
         return $rows;
     }
 
+    ## 정렬
+    public function orderBy($key)
+    {
+        if (isset($this->sort[$key])) {
+            // 토글
+            if($this->sort[$key] == "desc") {
+                $this->sort[$key] = "asc";
+            } else {
+                $this->sort[$key] = "desc";
+            }
+        } else {
+            // 설정
+            $this->sort[$key] = "desc";
+        }
+    }
+
+    public function getOrderBy($key)
+    {
+        if (isset($this->sort[$key])) {
+            return $this->sort[$key];
+        }
+    }
+
+    private function sortClear()
+    {
+        $this->sort = [];
+    }
+
     ## 검색
     public function filter_search()
     {
@@ -121,6 +172,7 @@ class WireTable extends Component
     public function filter_reset()
     {
         $this->filter = [];
+        $this->sortClear();
     }
 
     protected $listeners = ['refeshTable'];
@@ -184,8 +236,22 @@ class WireTable extends Component
 
     public function checkeDelete()
     {
+        // 컨트롤러 메서드 호출
+        if(isset($this->actions['controller'])) {
+            $controller = $this->actions['controller']::getInstance($this);
+            if(method_exists($controller, "hookCheckDelete")) {
+                $controller->hookCheckDelete($this->selected);
+            }
+        }
+
         // 복수의 ids를 삭제합니다.
         DB::table($this->actions['table'])->whereIn('id', $this->selected)->delete();
+
+        ## 페이지목록 수 변경시,
+        ## 기존에 선택된 체크박스는 초기화 함.
+        $this->selectedall = false;
+        $this->selected = [];
+
         $this->popupDeleteClose();
     }
 
