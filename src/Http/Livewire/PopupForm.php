@@ -6,10 +6,13 @@ use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Livewire\WithFileUploads;
 
 class PopupForm extends Component
 {
+    use WithFileUploads;
     /**
      * LivePopupForm with AlpineJS
      */
@@ -144,6 +147,9 @@ class PopupForm extends Component
 
     public function update()
     {
+        // 수정전, 원본 데이터 읽기
+        $origin = DB::table($this->actions['table'])->find($this->actions['id']);
+
         //유효성 검사
         if (isset($this->actions['validate'])) {
             $validator = Validator::make($this->form, $this->actions['validate'])->validate();
@@ -157,6 +163,21 @@ class PopupForm extends Component
                 $this->form = $controller->hookUpdated($this->form);
             }
         }
+
+
+
+        // 파일 업로드 체크
+        $this->fileUpload();
+        // uploadfile 필드 조회
+        $fields = DB::table('uploadfile')->where('table', $this->actions['table'])->get();
+        foreach($fields as $item) {
+            $key = $item->field; // 업로드 필드명
+            if($origin->$key != $this->form[$key]) {
+                ## 이미지를 수정하는 경우, 기존 이미지는 삭제합니다.
+                Storage::delete($origin->$key);
+            }
+        }
+
 
         // 데이터 수정
         if($this->form) {
@@ -194,13 +215,27 @@ class PopupForm extends Component
 
     public function delete()
     {
+        $row = DB::table($this->actions['table'])->find($this->actions['id']);
+        //dd($row);
+
         // 컨트롤러 메서드 호출
         if(isset($this->actions['controller'])) {
             $controller = $this->actions['controller']::getInstance($this);
             if(method_exists($controller, "hookDeleted")) {
-                $controller->hookDeleted();
+                $row = $controller->hookDeleted($row);
             }
         }
+
+        // uploadfile 필드 조회
+        $fields = DB::table('uploadfile')->where('table', $this->actions['table'])->get();
+        foreach($fields as $item) {
+            $key = $item->field; // 업로드 필드명
+            if (isset($row->$key)) {
+                Storage::delete($row->$key);
+            }
+        }
+
+        //dd($fields);
 
         // 데이터 삭제
         DB::table($this->actions['table'])
@@ -215,6 +250,43 @@ class PopupForm extends Component
 
         // Livewire Table을 갱신을 호출합니다.
         $this->emit('refeshTable');
+    }
+
+    /**
+     * 파일 업로드
+     */
+    public function fileUpload()
+    {
+        // 테이블명과 동일한 폴더에 저장
+        $upload_directory = $this->actions['table'];
+
+        // public or private 저장영역 설정
+        if(isset($this->actions['visible'])) {
+            $visible = $this->actions['visible'];
+        } else {
+            $visible = "private";
+        }
+
+        $appPath = storage_path('app/'.$visible);
+        $path = $appPath.DIRECTORY_SEPARATOR.$upload_directory;
+        if(!\is_dir($path)) {
+            \mkdir($path, 755, true);
+        }
+
+        foreach($this->form as $key => $item) {
+            if($item instanceof \Livewire\TemporaryUploadedFile) {
+                $filename = $item->store($upload_directory, $visible);
+                $this->form[$key] = $visible."/".$filename;
+
+                // uploadfile 테이블에 기록
+                DB::table('uploadfile')->updateOrInsert([
+                    'table' => $this->actions['table'],
+                    'field' => $key
+                ]);
+
+            }
+        }
+
     }
 
 

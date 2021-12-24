@@ -5,6 +5,7 @@ namespace Jiny\Table\Http\Livewire;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Storage;
 
 class WireTable extends Component
 {
@@ -236,6 +237,18 @@ class WireTable extends Component
 
     public function checkeDelete()
     {
+        // uploadfile 필드 조회
+        $fields = DB::table('uploadfile')->where('table', $this->actions['table'])->get();
+        $rows = DB::table($this->actions['table'])->whereIn('id', $this->selected)->get();
+        foreach ($rows as $row) {
+            foreach($fields as $item) {
+                $key = $item->field; // 업로드 필드명
+                if (isset($row->$key)) {
+                    Storage::delete($row->$key);
+                }
+            }
+        }
+
         // 컨트롤러 메서드 호출
         if(isset($this->actions['controller'])) {
             $controller = $this->actions['controller']::getInstance($this);

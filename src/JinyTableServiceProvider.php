@@ -17,6 +17,9 @@ class JinyTableServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../resources/views', $this->package);
 
+        // 데이터베이스
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+
         // 팝업 Dialog
         Blade::component($this->package.'::components.'.'dialog-modal', 'dialog-modal');
         Blade::component($this->package.'::components.'.'modal', 'modal');
