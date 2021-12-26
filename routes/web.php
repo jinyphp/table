@@ -12,3 +12,14 @@ Route::middleware(['web','auth:sanctum', 'verified'])
 
 });
 
+// 관리자
+Route::middleware(['web','auth:sanctum', 'verified'])
+->name('admin.table.')
+->prefix('/admin/table')->group(function () {
+
+    Route::resource('actions',\Jiny\Table\Http\Controllers\Admin\ActionsController::class);
+
+    ## 설정
+    Route::resource('setting', \Jiny\Table\Http\Controllers\Admin\SettingController::class);
+
+});

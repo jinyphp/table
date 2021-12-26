@@ -2,11 +2,13 @@
     <style>
 
     </style>
+
     <!-- 팝업 Rule 수정창 -->
     @if ($popupRule)
     <x-dialog-modal wire:model="popupRule" maxWidth="2xl">
         <x-slot name="content">
             <x-navtab class="mb-3 nav-bordered">
+
                 <x-navtab-item><!-- Action 정보 -->
                     <x-navtab-link class="rounded-0">
                         <span class="d-none d-md-block">정보</span>
@@ -71,13 +73,7 @@
                                     ->setWire('model.defer',"form.view_main")
                                     ->setWidth("standard")
                                 !!}
-        {{--
-                                <a href="javascript: void(0);" wire:click="resourceEdit('view_main')">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                </a>
-                                --}}
+
                             </x-form-item>
                         </x-form-hor>
 
@@ -187,6 +183,21 @@
 
                 </x-navtab-item>
 
+                <x-navtab-item ><!-- formTab -->
+                    <x-navtab-link class="rounded-0">
+                        <span class="d-none d-md-block">권환</span>
+                    </x-navtab-link>
+
+                    <x-form-hor>
+                        <x-form-label>로그인</x-form-label>
+                        <x-form-item>
+                            {!! xCheckbox()
+                                ->setWire('model.defer',"form.auth_login")
+                            !!}
+                            <div>로그인 사용자만 사용이 가능합니다.</div>
+                        </x-form-item>
+                    </x-form-hor>
+                </x-navtab-item>
 
                 <x-navtab-item ><!-- formTab -->
                     <x-navtab-link class="rounded-0">
@@ -201,35 +212,32 @@
                             !!}
                         </x-form-item>
                     </x-form-hor>
-
                 </x-navtab-item>
-            </x-navtab>
 
+            </x-navtab>
         </x-slot>
 
         <x-slot name="footer">
+            <div class="flex justify-between">
             @if (isset($actions['id']))
-                <div class="flex justify-between">
-                    <div>
-
-                    </div>
-                    <div>
-                        <x-button secondary wire:click="popupRuleClose">취소</x-button>
-                        <x-button primary wire:click="update">수정</x-button>
-                    </div>
+                <div>
+                </div>
+                <div>
+                    <x-button secondary wire:click="popupRuleClose">취소</x-button>
+                    <x-button primary wire:click="update">수정</x-button>
                 </div>
             @else
-                <div class="flex justify-between">
-                    <div></div>
-                    <div class="text-right">
-                        <x-button secondary wire:click="popupRuleClose">취소</x-button>
-                        <x-button primary wire:click="save">저장</x-button>
-                    </div>
+                <div></div>
+                <div class="text-right">
+                    <x-button secondary wire:click="popupRuleClose">취소</x-button>
+                    <x-button primary wire:click="save">저장</x-button>
                 </div>
             @endif
+            </div>
         </x-slot>
     </x-dialog-modal>
     @endif
+
 
     @if ($popupResourceEdit)
     <x-dialog-modal wire:model="popupResourceEdit" maxWidth="2xl">

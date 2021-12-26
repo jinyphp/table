@@ -4,11 +4,13 @@
         <div class="page-title-box">
             <ol class="m-0 breadcrumb">
                 <li class="breadcrumb-item"><a href="javascript: void(0);">Home</a></li>
-                @foreach (explode("/",$actions['route']['uri']) as $item)
-                    @if($item != "{id}")
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">{{$item}}</a></li>
-                    @endif
-                @endforeach
+                @if (isset($actions['route']['uri']))
+                    @foreach (explode("/",$actions['route']['uri']) as $item)
+                        @if($item != "{id}")
+                            <li class="breadcrumb-item"><a href="javascript: void(0);">{{$item}}</a></li>
+                        @endif
+                    @endforeach
+                @endif
             </ol>
 
             <div class="mb-3">

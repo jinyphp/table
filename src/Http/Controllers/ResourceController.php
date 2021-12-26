@@ -28,14 +28,21 @@ class ResourceController extends Controller
         $this->actions['routename'] = substr($routename,0,strrpos($routename,'.'));
         $this->actions['route']['name'] = $this->actions['routename'];
 
-        $path = resource_path(self::PATH);
+        $conf = config("jiny_table.path");
+        $path = resource_path( $conf['path'] ?? self::PATH);
+        foreach ($this->readJsonAction($path) as $key => $value) {
+            $this->actions[$key] = $value;
+        }
+    }
+
+    private function readJsonAction($path)
+    {
         $filename = $path.DIRECTORY_SEPARATOR.str_replace("/","_",$this->actions['route']['uri']).".json";
         if (file_exists($filename)) {
-            $rules = json_decode(file_get_contents($filename), true);
-            foreach ($rules as $key => $value) {
-                $this->actions[$key] = $value;
-            }
+            return json_decode(file_get_contents($filename), true);
         }
+
+        return [];
     }
 
     protected function setVisit($obj)
