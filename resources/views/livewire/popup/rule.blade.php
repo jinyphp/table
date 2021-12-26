@@ -106,6 +106,16 @@
                     </x-navtab-link>
 
                     <x-form-hor>
+                        <x-form-label>view_form</x-form-label>
+                        <x-form-item>
+                            {!! xInputText()
+                                ->setWire('model.defer',"form.view_form")
+                                ->setWidth("standard")
+                            !!}
+                        </x-form-item>
+                    </x-form-hor>
+
+                    <x-form-hor>
                         <x-form-label>view_edit</x-form-label>
                         <x-form-item>
                             {!! xInputText()
@@ -115,15 +125,7 @@
                         </x-form-item>
                     </x-form-hor>
 
-                    <x-form-hor>
-                        <x-form-label>view_form</x-form-label>
-                        <x-form-item>
-                            {!! xInputText()
-                                ->setWire('model.defer',"form.view_form")
-                                ->setWidth("standard")
-                            !!}
-                        </x-form-item>
-                    </x-form-hor>
+
 
                 </x-navtab-item>
 

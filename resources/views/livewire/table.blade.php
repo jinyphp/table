@@ -33,7 +33,9 @@
         </x-card-body>
 
         <x-card-footer>
-            {{ $rows->links() }}
+            @if (isset($row) && is_object($row))
+                {{ $rows->links() }}
+            @endif
 
             {{-- 선택갯수 표시--}}
             <span id="selected-num">{{count($selected)}}</span>

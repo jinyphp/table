@@ -12,7 +12,8 @@ Route::middleware(['web','auth:sanctum', 'verified'])
 
 });
 
-// 관리자
+
+// 관리자 URL
 Route::middleware(['web','auth:sanctum', 'verified'])
 ->name('admin.table.')
 ->prefix('/admin/table')->group(function () {

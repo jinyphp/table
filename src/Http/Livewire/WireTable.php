@@ -40,101 +40,109 @@ class WireTable extends Component
             $controller->HookIndexing();
         }
 
-        $rows = $this->dbFetch($this->actions);
+        if(isset($this->actions['table']) && $this->actions['table']) {
+            $rows = $this->dbFetch($this->actions);
 
-        // 컨트롤러 메서드 호출
-        if ($controller = $this->isHook("HookIndexed")) {
-            $controller->HookIndexed($rows);
-        }
+            // 컨트롤러 메서드 호출
+            if ($controller = $this->isHook("HookIndexed")) {
+                $controller->HookIndexed($rows);
+            }
 
-        // 내부함수 생성
-        // 팝업창 폼을 활성화 합니다.
-        $funcEditPopup = function ($item, $title)
-        {
-            $link = xLink($title)->setHref("javascript: void(0);");
-            $link->setAttribute("wire:click", "$"."emit('edit','".$item->id."')");
+            // 내부함수 생성
+            // 팝업창 폼을 활성화 합니다.
+            $funcEditPopup = function ($item, $title)
+            {
+                $link = xLink($title)->setHref("javascript: void(0);");
+                $link->setAttribute("wire:click", "$"."emit('edit','".$item->id."')");
 
-            if (isset($item->enable)) {
+                if (isset($item->enable)) {
+                    if($item->enable) {
+                        return $link;
+                    } else {
+                        return xSpan($link)->style("text-decoration:line-through;");
+                    }
+                }
+
+                return $link;
+            };
+
+            // 내부함수 생성
+            // form 페이지로 url을 이동합니다.
+            $rules = $this->actions;
+            $funcEditLink = function ($item, $title) use ($rules)
+            {
+                $link = xLink($title)->setHref(route($rules['routename'].".edit", $item->id));
                 if($item->enable) {
                     return $link;
                 } else {
                     return xSpan($link)->style("text-decoration:line-through;");
                 }
-            }
-
-            return $link;
-        };
-
-        // 내부함수 생성
-        // form 페이지로 url을 이동합니다.
-        $rules = $this->actions;
-        $funcEditLink = function ($item, $title) use ($rules)
-        {
-            $link = xLink($title)->setHref(route($rules['routename'].".edit", $item->id));
-            if($item->enable) {
                 return $link;
-            } else {
-                return xSpan($link)->style("text-decoration:line-through;");
-            }
-            return $link;
-        };
+            };
 
 
-        return view("jinytable::livewire.table",[
-            'rows'=>$rows,
-            'popupEdit'=>$funcEditPopup,
-            'editLink'=>$funcEditLink
-        ]);
+            return view("jinytable::livewire.table",[
+                'rows'=>$rows,
+                'popupEdit'=>$funcEditPopup,
+                'editLink'=>$funcEditLink
+            ]);
+
+        } else {
+            // 테이블명이 없는 경우
+            return view("jinytable::error.tablename_none");
+        }
     }
 
     private function dbFetch($actions)
     {
-        // 테이블 설정
-        $DB = DB::table($this->actions['table']);
 
-        // 제한조건 적용
-        if(isset($this->actions['where']) && is_array($this->actions['where'])) {
-            foreach ($this->actions['where'] as $key => $where) {
-                $DB->where($key,$where);
+            // 테이블 설정
+            $DB = DB::table($this->actions['table']);
+
+            // 제한조건 적용
+            if(isset($this->actions['where']) && is_array($this->actions['where'])) {
+                foreach ($this->actions['where'] as $key => $where) {
+                    $DB->where($key,$where);
+                }
             }
-        }
 
-        // 사용자필터 조건적용
-        foreach ($this->filter as $key => $filter) {
-            $DB->where($key,'like','%'.$filter.'%');
-        }
-
-        // Sort
-        if (empty($this->sort)) {
-            $DB->orderBy('id',"desc");
-        } else {
-            foreach($this->sort as $key => $value) {
-                $DB->orderBy($key, $value);
+            // 사용자필터 조건적용
+            foreach ($this->filter as $key => $filter) {
+                $DB->where($key,'like','%'.$filter.'%');
             }
-        }
 
-        // 최종 데이터 읽기
-        // 페이징이 없는 경우, 전체 읽기
-        if(isset($this->paging) && is_numeric($this->paging) ) {
-            $rows = $DB->paginate($this->paging);
-        } else {
-            $rows = $DB->get();
-        }
-
-        $this->data = [];
-        foreach($rows as $i => $item) {
-            foreach($item as $k => $v) {
-                $this->data[$i][$k] = $v;
+            // Sort
+            if (empty($this->sort)) {
+                $DB->orderBy('id',"desc");
+            } else {
+                foreach($this->sort as $key => $value) {
+                    $DB->orderBy($key, $value);
+                }
             }
-        }
 
-        $this->ids = [];
-        foreach($this->data as $i => $item) {
-            $this->ids[$i] = $item['id'];
-        }
+            // 최종 데이터 읽기
+            // 페이징이 없는 경우, 전체 읽기
+            if(isset($this->paging) && is_numeric($this->paging) ) {
+                $rows = $DB->paginate($this->paging);
+            } else {
+                $rows = $DB->get();
+            }
 
-        //session()->flash('message',"데이터...");
-        return $rows;
+            $this->data = [];
+            foreach($rows as $i => $item) {
+                foreach($item as $k => $v) {
+                    $this->data[$i][$k] = $v;
+                }
+            }
+
+            $this->ids = [];
+            foreach($this->data as $i => $item) {
+                $this->ids[$i] = $item['id'];
+            }
+
+            //session()->flash('message',"데이터...");
+            return $rows;
+
     }
 
     ## 정렬
