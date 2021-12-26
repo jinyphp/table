@@ -24,13 +24,13 @@ class JinyTableServiceProvider extends ServiceProvider
         Blade::component($this->package.'::components.'.'dialog-modal', 'dialog-modal');
         Blade::component($this->package.'::components.'.'modal', 'modal');
 
+        Blade::component($this->package.'::components.'.'loading-indicator', 'loading-indicator');
 
         // 테이블 컴포넌트...
         Blade::component($this->package.'::components.'.'datatable', 'datatable');
         Blade::component($this->package.'::components.'.'datatable', 'data-table');
         Blade::component(\Jiny\Table\View\Components\DataTableThead::class, "datatable-thead");
         Blade::component(\Jiny\Table\View\Components\DataTableThead::class, "data-table-thead");
-
         Blade::component(\Jiny\Table\View\Components\DataTableTr::class, "datatable-tr");
         Blade::component(\Jiny\Table\View\Components\DataTableTr::class, "data-table-tr");
 

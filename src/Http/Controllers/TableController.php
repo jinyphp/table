@@ -76,7 +76,8 @@ class TableController extends Controller
         }
 
         return view($view,[
-            'actions'=>$this->actions
+            'actions'=>$this->actions,
+            'request'=>$request
         ]);
     }
 

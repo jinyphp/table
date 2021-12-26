@@ -43,30 +43,30 @@ class PopupForm extends Component
         $this->popupForm = false;
     }
 
-    public function popupFormCreate()
+    public function popupFormCreate($value=null)
     {
-        return $this->create();
+        return $this->create($value);
     }
 
 
     /**
      * 신규 데이터 삽입
      */
-    public function create()
+    public function create($value=null)
     {
         // 컨트롤러 메서드 호출
         if(isset($this->actions['controller'])) {
             $controller = $this->actions['controller']::getInstance($this);
             if(method_exists($controller, "hookCreated")) {
                 //dd($controller);
-                $controller->hookCreated();
+                $controller->hookCreated($value);
             }
         }
 
         unset($this->actions['id']);
 
         // 입력데이터 초기화
-        $this->cancel();
+        //$this->cancel();
 
         $this->popupFormOpen();
     }
@@ -77,6 +77,8 @@ class PopupForm extends Component
         if (isset($this->actions['validate'])) {
             $validator = Validator::make($this->form, $this->actions['validate'])->validate();
         }
+
+
 
         // 시간정보 생성
         $this->form['created_at'] = date("Y-m-d H:i:s");
@@ -216,7 +218,6 @@ class PopupForm extends Component
     public function delete()
     {
         $row = DB::table($this->actions['table'])->find($this->actions['id']);
-        //dd($row);
 
         // 컨트롤러 메서드 호출
         if(isset($this->actions['controller'])) {

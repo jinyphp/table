@@ -13,21 +13,6 @@
                     </x-navtab-link>
 
                     <fieldset>
-                        <legend class="px-2 text-xs">Blade Resource</legend>
-
-                        <x-form-hor>
-                            <x-form-label>View_title </x-form-label>
-                            <x-form-item>
-                                {!! xInputText()
-                                    ->setWire('model.defer',"form.view_title")
-                                    ->setWidth("standard")
-                                !!}
-                            </x-form-item>
-                        </x-form-hor>
-
-                    </fieldset>
-
-                    <fieldset>
                         <legend class="px-2 text-xs">Argument</legend>
                         <x-form-hor>
                             <x-form-label>타이틀</x-form-label>
@@ -47,6 +32,27 @@
                             </x-form-item>
                         </x-form-hor>
                     </fieldset>
+
+                    <fieldset>
+                        <legend class="px-2 text-xs">Blade Resource</legend>
+
+                        <x-form-hor>
+                            <x-form-label>View_title </x-form-label>
+                            <x-form-item>
+                                {!! xCheckbox()
+                                    ->setWire('model.defer',"form.view_title_check")
+                                !!}
+
+                                {!! xInputText()
+                                    ->setWire('model.defer',"form.view_title")
+                                    ->setWidth("standard")
+                                !!}
+                            </x-form-item>
+                        </x-form-hor>
+
+                    </fieldset>
+
+
                 </x-navtab-item>
 
 
