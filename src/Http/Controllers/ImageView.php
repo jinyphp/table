@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * 이미지를 출력합니다.
+ */
 namespace Jiny\Table\Http\Controllers;
 
 use App\Http\Controllers\Controller;

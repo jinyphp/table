@@ -36,8 +36,8 @@ class WireConfig extends Component
         // 컨트롤러 메서드 호출
         if(isset($this->actions['controller'])) {
             $controller = $this->actions['controller']::getInstance($this);
-            if(method_exists($controller, "hookCreated")) {
-                $controller->hookCreated();
+            if(method_exists($controller, "hookCreating")) {
+                $controller->hookCreating();
             }
         }
 
@@ -67,8 +67,8 @@ class WireConfig extends Component
         // 컨트롤러 메서드 호출
         if(isset($this->actions['controller'])) {
             $controller = $this->actions['controller']::getInstance($this);
-            if(method_exists($controller, "hookStored")) {
-                $form = $controller->hookStored($this->form);
+            if(method_exists($controller, "hookStoring")) {
+                $form = $controller->hookStoring($this->form);
             } else {
                 $form = $this->form;
             }

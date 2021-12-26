@@ -42,11 +42,6 @@ class ConfigController extends Controller
         return self::$Instance;
     }
 
-    /**
-     * CRUD Resource Process
-     */
-
-
 
     public function index(Request $request)
     {
@@ -63,64 +58,5 @@ class ConfigController extends Controller
     }
 
 
-    /*
-    public function create()
-    {
-        // 메인뷰 페이지...
-        if (isset($this->actions['view_edit'])) {
-            $view = $this->actions['view_edit'];
-            //dd($view);
-        } else {
-            $view = "jinytable::edit";
-        }
-
-        return view($view,[
-            'actions'=>$this->actions
-        ]);
-    }
-
-    public function store(Request $request)
-    {
-
-    }
-
-    public function show($id)
-    {
-        //
-    }
-
-    public function edit($id)
-    {
-        $this->actions['id'] = $id;
-        return view("jinytable::edit",['actions'=>$this->actions]);
-
-    }
-
-    public function update(Request $request, $id)
-    {
-
-    }
-
-    public function destroy($id, Request $request)
-    {
-
-    }
-    */
-
-    /**
-     * delete 선택한 항목 삭제
-     *
-     * @param  mixed $request
-     * @return void
-     */
-    /*
-    public function delete(Request $request)
-    {
-        $ids = $request->ids;
-        // 선택한 항목 삭제 AJAX
-        DB::table($this->tablename)->whereIn('id', $ids)->delete();
-        return response()->json(['status'=>"200", 'ids'=>$ids]);
-    }
-    */
 
 }

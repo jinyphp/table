@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 class WireTable extends Component
 {
     use WithPagination;
+    use \Jiny\Table\Http\Livewire\Hook;
 
     public $actions;
     public $paging = 10;
@@ -27,19 +28,23 @@ class WireTable extends Component
         }
     }
 
+
+
     /**
      * LiveListTable
      */
     public function render()
     {
+        // 컨트롤러 메서드 호출
+        if ($controller = $this->isHook("HookIndexing")) {
+            $controller->HookIndexing();
+        }
+
         $rows = $this->dbFetch($this->actions);
 
         // 컨트롤러 메서드 호출
-        if(isset($this->actions['controller'])) {
-            $controller = $this->actions['controller']::getInstance($this);
-            if(method_exists($controller, "HookIndexed")) {
-                $controller->hookIndexed($rows);
-            }
+        if ($controller = $this->isHook("HookIndexed")) {
+            $controller->HookIndexed($rows);
         }
 
         // 내부함수 생성
