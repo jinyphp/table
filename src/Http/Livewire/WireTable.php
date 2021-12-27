@@ -27,8 +27,20 @@ class WireTable extends Component
     public function mount()
     {
         $user = Auth::user();
-        $Role = new \Jiny\Auth\Roles($user->id);
-        $this->permit = $Role->permitAll($this->actions);
+        if (function_exists("authRoles")) {
+            $Role = authRoles($user->id);
+            //$Role = new \Jiny\Auth\Roles($user->id);
+            $this->permit = $Role->permitAll($this->actions);
+        } else {
+            // 모듈이 설치되어 있지 않는 경우, 모두 허용
+            $this->permit = [
+                'create' => true,
+                'read' => true,
+                'update' => true,
+                'delete' => true,
+            ];
+        }
+
 
         // 페이징 초기화
         if (isset($this->actions['paging'])) {
