@@ -65,12 +65,9 @@ class ResourceController extends Controller
     }
 
 
-
-
     /**
      * CRUD Resource Process
      */
-
     public function index(Request $request)
     {
         $user = Auth::user();

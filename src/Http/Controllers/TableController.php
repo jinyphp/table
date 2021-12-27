@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Auth;
 use Jiny\Table\Http\Controllers\ResourceController;
 class TableController extends ResourceController
 {
-    const MENU_PATH = "menus";
+    use \Jiny\Table\Http\Controllers\SetMenu;
+
+    //const MENU_PATH = "menus";
     public function __construct()
     {
         parent::__construct();  // setting Rule 초기화
@@ -17,17 +19,6 @@ class TableController extends ResourceController
 
         // 메뉴 설정
         $user = Auth::user();
-        if(isset($user->menu)) {
-            ## 사용자 지정메뉴 우선설정
-            xMenu()->setPath($user->menu);
-        } else {
-            ## 설정에서 적용한 메뉴
-            if(isset($this->actions['menu'])) {
-                $menuid = _getKey($this->actions['menu']);
-                xMenu()->setPath(self::MENU_PATH.DIRECTORY_SEPARATOR.$menuid.".json");
-            }
-        }
-
+        $this->setUserMenu($user);
     }
-
 }

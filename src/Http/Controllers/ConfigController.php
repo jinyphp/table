@@ -14,9 +14,11 @@ use Illuminate\Support\Facades\Auth;
 
 class ConfigController extends Controller
 {
+    use \Jiny\Table\Http\Controllers\SetMenu;
+
     // 리소스 저장경로
     const PATH = "actions";
-    const MENU_PATH = "menus";
+    //const MENU_PATH = "menus";
     protected $actions = [];
 
     public function __construct()
@@ -35,8 +37,11 @@ class ConfigController extends Controller
             $this->actions[$key] = $value;
         }
 
-        // 메뉴 설정
-        $user = Auth::user();
+    }
+
+    /*
+    protected function setUserMenu($user)
+    {
         if(isset($user->menu)) {
             ## 사용자 지정메뉴 우선설정
             xMenu()->setPath($user->menu);
@@ -48,6 +53,7 @@ class ConfigController extends Controller
             }
         }
     }
+    */
 
     private function readJsonAction($path)
     {
@@ -81,6 +87,10 @@ class ConfigController extends Controller
 
     public function index(Request $request)
     {
+        // 메뉴 설정
+        $user = Auth::user();
+        $this->setUserMenu($user);
+
         // 메인뷰 페이지...
         if (isset($this->actions['view_main'])) {
             $view = $this->actions['view_main'];
@@ -92,7 +102,5 @@ class ConfigController extends Controller
             'actions'=>$this->actions
         ]);
     }
-
-
 
 }

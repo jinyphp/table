@@ -15,46 +15,20 @@ class PopupForm extends Component
 {
     use WithFileUploads;
     use \Jiny\Table\Http\Livewire\Hook;
+    use \Jiny\Table\Http\Livewire\Permit;
 
     /**
      * LivePopupForm with AlpineJS
      */
     public $actions;
     public $form=[];
-
-    //public $auth;
     public $mode;
     private $controller;
 
-    public $permit;
-    public $popupPermit = false;
+
     public function mount()
     {
-        $user = Auth::user();
-        if (function_exists("authRoles")) {
-            $Role = authRoles($user->id);
-            //$Role = new \Jiny\Auth\Roles($user->id);
-            $this->permit = $Role->permitAll($this->actions);
-        } else {
-            // 모듈이 설치되어 있지 않는 경우, 모두 허용
-            $this->permit = [
-                'create' => true,
-                'read' => true,
-                'update' => true,
-                'delete' => true,
-            ];
-        }
-
-    }
-
-    public function popupPermitOpen()
-    {
-        $this->popupPermit = true;
-    }
-
-    public function popupPermitClose()
-    {
-        $this->popupPermit = false;
+        $this->permitCheck();
     }
 
     public function render()
@@ -350,7 +324,5 @@ class PopupForm extends Component
         }
 
     }
-
-
 
 }

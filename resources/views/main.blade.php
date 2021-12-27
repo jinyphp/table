@@ -45,8 +45,5 @@
         {{-- Admin Rule Setting --}}
         @include('jinytable::setActionRule')
 
-
-
-
     </x-theme-layout>
 </x-theme>

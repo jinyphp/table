@@ -4,13 +4,11 @@ namespace Jiny\Table\Http\Livewire;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
-
 use Illuminate\Support\Facades\Validator;
 
 class WireForm extends Component
 {
     public $actions;
-
     public $table;
     public $back=true;
     public $form=[];
@@ -88,6 +86,7 @@ class WireForm extends Component
         $this->form = [];
     }
 
+
     public function update()
     {
         //유효성 검사
@@ -111,21 +110,23 @@ class WireForm extends Component
         $this->form = [];
     }
 
+
     public function clear()
     {
         $this->form = [];
     }
 
+
     /**
      * 데이터 삭제
      */
-
     public $confirm = false;
 
     public function deleteConfirm()
     {
         $this->confirm = true;
     }
+
 
     public function delete()
     {
@@ -142,6 +143,7 @@ class WireForm extends Component
 
         $this->goToIndex();
     }
+
 
     private function goToIndex()
     {

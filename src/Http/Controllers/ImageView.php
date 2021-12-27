@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Route;
 
 class ImageView extends Controller
 {
-
     public function __construct()
     {
 
@@ -23,7 +22,7 @@ class ImageView extends Controller
 
         $appPath = storage_path('app/'.$uris[1]);
         $filePath = $appPath.DIRECTORY_SEPARATOR.$path.DIRECTORY_SEPARATOR.$filename;
-        //dd($filePath);
+
         if (file_exists($filePath)) {
             $file = basename($filePath);
             $extension = strtolower(substr(strrchr($file,"."),1));

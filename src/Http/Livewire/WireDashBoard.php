@@ -45,9 +45,8 @@ class WireDashBoard extends Component
             none
         </div>
     blade;
-
-
     }
+
 
     /**
      * 팝업창 관리

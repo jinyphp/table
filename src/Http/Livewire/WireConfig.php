@@ -1,5 +1,7 @@
 <?php
-
+/**
+ *
+ */
 namespace Jiny\Table\Http\Livewire;
 
 use Livewire\Component;
@@ -9,6 +11,8 @@ use Illuminate\Support\Facades\Validator;
 
 class WireConfig extends Component
 {
+    use \Jiny\Table\Http\Livewire\Permit;
+
     public $actions;
     public $filename;
 
@@ -18,6 +22,12 @@ class WireConfig extends Component
     public $form=[];
 
     public function mount()
+    {
+        $this->permitCheck();
+        $this->configLoading();
+    }
+
+    private function configLoading()
     {
         if(isset($this->actions['filename'])) {
             $this->filename = $this->actions['filename'];
@@ -56,31 +66,39 @@ class WireConfig extends Component
      */
     public function store()
     {
-        //유효성 검사
-        if (isset($this->actions['validate'])) {
-            $validator = Validator::make($this->form, $this->actions['validate'])->validate();
-        }
+        if($this->permit['create'] || $this->permit['update']) {
+            //유효성 검사
+            if (isset($this->actions['validate'])) {
+                $validator = Validator::make($this->form, $this->actions['validate'])->validate();
+            }
 
-        #// $this->form['created_at'] = date("Y-m-d H:i:s");
-        $this->form['updated_at'] = date("Y-m-d H:i:s");
+            #// $this->form['created_at'] = date("Y-m-d H:i:s");
+            $this->form['updated_at'] = date("Y-m-d H:i:s");
 
-        // 컨트롤러 메서드 호출
-        if(isset($this->actions['controller'])) {
-            $controller = $this->actions['controller']::getInstance($this);
-            if(method_exists($controller, "hookStoring")) {
-                $form = $controller->hookStoring($this->form);
+            // 컨트롤러 메서드 호출
+            if(isset($this->actions['controller'])) {
+                $controller = $this->actions['controller']::getInstance($this);
+                if(method_exists($controller, "hookStoring")) {
+                    $form = $controller->hookStoring($this->form);
+                } else {
+                    $form = $this->form;
+                }
             } else {
                 $form = $this->form;
             }
-        } else {
-            $form = $this->form;
-        }
 
-        // 설정값을 파일로 저장
-        if ($this->filename) {
-            $file = $this->convToPHP($form);
-            $path = config_path().DIRECTORY_SEPARATOR.$this->filename.".php";
-            file_put_contents($path, $file);
+            // 설정값을 파일로 저장
+            if ($this->filename) {
+                $file = $this->convToPHP($form);
+                $path = config_path().DIRECTORY_SEPARATOR.$this->filename.".php";
+                file_put_contents($path, $file);
+            }
+
+        } else {
+            $this->popupPermitOpen();
+
+            // 다시 데이터 로딩...
+            $this->configLoading();
         }
     }
 
@@ -112,7 +130,5 @@ return ".$str.";";
             return redirect()->route($this->url);
         }
     }
-
-
 
 }

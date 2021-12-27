@@ -1,5 +1,7 @@
 <?php
-
+/**
+ *
+ */
 namespace Jiny\Table\Http\Livewire;
 
 use Livewire\Component;
@@ -13,6 +15,7 @@ class WireTable extends Component
 {
     use WithPagination;
     use \Jiny\Table\Http\Livewire\Hook;
+    use \Jiny\Table\Http\Livewire\Permit;
 
     public $actions;
     public $paging = 10;
@@ -22,40 +25,15 @@ class WireTable extends Component
     public $data=[];
     public $sort=[];
 
-    public $permit;
-    public $popupPermit = false;
+
     public function mount()
     {
-        $user = Auth::user();
-        if (function_exists("authRoles")) {
-            $Role = authRoles($user->id);
-            //$Role = new \Jiny\Auth\Roles($user->id);
-            $this->permit = $Role->permitAll($this->actions);
-        } else {
-            // 모듈이 설치되어 있지 않는 경우, 모두 허용
-            $this->permit = [
-                'create' => true,
-                'read' => true,
-                'update' => true,
-                'delete' => true,
-            ];
-        }
-
+        $this->permitCheck();
 
         // 페이징 초기화
         if (isset($this->actions['paging'])) {
             $this->paging = $this->actions['paging'];
         }
-    }
-
-    public function popupPermitOpen()
-    {
-        $this->popupPermit = true;
-    }
-
-    public function popupPermitClose()
-    {
-        $this->popupPermit = false;
     }
 
 
@@ -72,7 +50,6 @@ class WireTable extends Component
         if(isset($this->actions['table']) && $this->actions['table']) {
 
             $rows = $this->dbFetch($this->actions);
-            //dd($rows);
 
             // 컨트롤러 메서드 호출
             if ($controller = $this->isHook("HookIndexed")) {
@@ -111,7 +88,6 @@ class WireTable extends Component
                 return $link;
             };
 
-            //dd($this->actions);
             return view("jinytable::livewire.table",[
                 'rows'=>$rows,
                 'popupEdit'=>$funcEditPopup,
@@ -124,57 +100,57 @@ class WireTable extends Component
         }
     }
 
+
     private function dbFetch($actions)
     {
+        // 테이블 설정
+        $DB = DB::table($this->actions['table']);
 
-            // 테이블 설정
-            $DB = DB::table($this->actions['table']);
-
-            // 제한조건 적용
-            if(isset($this->actions['where']) && is_array($this->actions['where'])) {
-                foreach ($this->actions['where'] as $key => $where) {
-                    $DB->where($key,$where);
-                }
+        // 제한조건 적용
+        if(isset($this->actions['where']) && is_array($this->actions['where'])) {
+            foreach ($this->actions['where'] as $key => $where) {
+                $DB->where($key,$where);
             }
+        }
 
-            // 사용자필터 조건적용
-            foreach ($this->filter as $key => $filter) {
-                $DB->where($key,'like','%'.$filter.'%');
+        // 사용자필터 조건적용
+        foreach ($this->filter as $key => $filter) {
+            $DB->where($key,'like','%'.$filter.'%');
+        }
+
+        // Sort
+        if (empty($this->sort)) {
+            $DB->orderBy('id',"desc");
+        } else {
+            foreach($this->sort as $key => $value) {
+                $DB->orderBy($key, $value);
             }
+        }
 
-            // Sort
-            if (empty($this->sort)) {
-                $DB->orderBy('id',"desc");
-            } else {
-                foreach($this->sort as $key => $value) {
-                    $DB->orderBy($key, $value);
-                }
+        // 최종 데이터 읽기
+        // 페이징이 없는 경우, 전체 읽기
+        if(isset($this->paging) && is_numeric($this->paging) ) {
+            $rows = $DB->paginate($this->paging);
+        } else {
+            $rows = $DB->get();
+        }
+
+        $this->data = [];
+        foreach($rows as $i => $item) {
+            foreach($item as $k => $v) {
+                $this->data[$i][$k] = $v;
             }
+        }
 
-            // 최종 데이터 읽기
-            // 페이징이 없는 경우, 전체 읽기
-            if(isset($this->paging) && is_numeric($this->paging) ) {
-                $rows = $DB->paginate($this->paging);
-            } else {
-                $rows = $DB->get();
-            }
+        $this->ids = [];
+        foreach($this->data as $i => $item) {
+            $this->ids[$i] = $item['id'];
+        }
 
-            $this->data = [];
-            foreach($rows as $i => $item) {
-                foreach($item as $k => $v) {
-                    $this->data[$i][$k] = $v;
-                }
-            }
-
-            $this->ids = [];
-            foreach($this->data as $i => $item) {
-                $this->ids[$i] = $item['id'];
-            }
-
-            //session()->flash('message',"데이터...");
-            return $rows;
-
+        //session()->flash('message',"데이터...");
+        return $rows;
     }
+
 
     ## 정렬
     public function orderBy($key)
@@ -192,6 +168,7 @@ class WireTable extends Component
         }
     }
 
+
     public function getOrderBy($key)
     {
         if (isset($this->sort[$key])) {
@@ -199,10 +176,12 @@ class WireTable extends Component
         }
     }
 
+
     private function sortClear()
     {
         $this->sort = [];
     }
+
 
     ## 검색
     public function filter_search()
@@ -214,11 +193,13 @@ class WireTable extends Component
         //session()->flash('message',"데이터 검색");
     }
 
+
     public function filter_reset()
     {
         $this->filter = [];
         $this->sortClear();
     }
+
 
     protected $listeners = ['refeshTable'];
     public function refeshTable()
@@ -226,11 +207,13 @@ class WireTable extends Component
         ## 페이지를 재갱신 합니다.
     }
 
+
     /**
      * 체크박스
      */
     public $selectedall = false;
     public $selected = [];
+
 
     // Livewire Hook
     public function updatedSelectedall($value)
@@ -245,6 +228,7 @@ class WireTable extends Component
         }
     }
 
+
     // Livewire Hook
     public function updatedSelected($value)
     {
@@ -255,6 +239,7 @@ class WireTable extends Component
         }
     }
 
+
     // Livewire Hook
     public function updatedPaging($value)
     {
@@ -263,6 +248,7 @@ class WireTable extends Component
         $this->selectedall = false;
         $this->selected = [];
     }
+
 
     /**
      * 선택삭제 팝업창
@@ -277,15 +263,16 @@ class WireTable extends Component
         }
     }
 
+
     public function popupDeleteClose()
     {
         // 삭제 확인창을 닫기
         $this->popupDelete = false;
     }
 
+
     public function checkeDelete()
     {
-
         if($this->permit['delete']) {
 
             // uploadfile 필드 조회
