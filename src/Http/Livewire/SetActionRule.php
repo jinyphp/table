@@ -44,7 +44,7 @@ class SetActionRule extends Component
 
     public function render()
     {
-        return view("jinytable::livewire.popup.rule");
+        return view("jinytable::livewire.popup.rules");
     }
 
     public $form = [];
@@ -65,7 +65,11 @@ class SetActionRule extends Component
         file_put_contents($filename, $json);
 
         $this->popupRuleClose();
+
+        // Livewire Table을 갱신을 호출합니다.
+        $this->emit('refeshTable');
     }
+
 
     public $content;
     public $resourceFile;

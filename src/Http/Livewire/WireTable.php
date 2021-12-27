@@ -4,6 +4,8 @@ namespace Jiny\Table\Http\Livewire;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Storage;
 
@@ -20,14 +22,29 @@ class WireTable extends Component
     public $data=[];
     public $sort=[];
 
+    public $permit;
+    public $popupPermit = false;
     public function mount()
     {
+        $user = Auth::user();
+        $Role = new \Jiny\Auth\Roles($user->id);
+        $this->permit = $Role->permitAll($this->actions);
+
         // 페이징 초기화
         if (isset($this->actions['paging'])) {
             $this->paging = $this->actions['paging'];
         }
     }
 
+    public function popupPermitOpen()
+    {
+        $this->popupPermit = true;
+    }
+
+    public function popupPermitClose()
+    {
+        $this->popupPermit = false;
+    }
 
 
     /**
@@ -41,7 +58,9 @@ class WireTable extends Component
         }
 
         if(isset($this->actions['table']) && $this->actions['table']) {
+
             $rows = $this->dbFetch($this->actions);
+            //dd($rows);
 
             // 컨트롤러 메서드 호출
             if ($controller = $this->isHook("HookIndexed")) {
@@ -80,7 +99,7 @@ class WireTable extends Component
                 return $link;
             };
 
-
+            //dd($this->actions);
             return view("jinytable::livewire.table",[
                 'rows'=>$rows,
                 'popupEdit'=>$funcEditPopup,
@@ -239,7 +258,11 @@ class WireTable extends Component
     public $popupDelete = false;
     public function popupDeleteOpen()
     {
-        $this->popupDelete = true;
+        if($this->permit['delete']) {
+            $this->popupDelete = true;
+        } else {
+            $this->popupPermitOpen();
+        }
     }
 
     public function popupDeleteClose()
@@ -250,35 +273,42 @@ class WireTable extends Component
 
     public function checkeDelete()
     {
-        // uploadfile 필드 조회
-        $fields = DB::table('uploadfile')->where('table', $this->actions['table'])->get();
-        $rows = DB::table($this->actions['table'])->whereIn('id', $this->selected)->get();
-        foreach ($rows as $row) {
-            foreach($fields as $item) {
-                $key = $item->field; // 업로드 필드명
-                if (isset($row->$key)) {
-                    Storage::delete($row->$key);
+
+        if($this->permit['delete']) {
+
+            // uploadfile 필드 조회
+            $fields = DB::table('uploadfile')->where('table', $this->actions['table'])->get();
+            $rows = DB::table($this->actions['table'])->whereIn('id', $this->selected)->get();
+            foreach ($rows as $row) {
+                foreach($fields as $item) {
+                    $key = $item->field; // 업로드 필드명
+                    if (isset($row->$key)) {
+                        Storage::delete($row->$key);
+                    }
                 }
             }
-        }
 
-        // 컨트롤러 메서드 호출
-        if(isset($this->actions['controller'])) {
-            $controller = $this->actions['controller']::getInstance($this);
-            if(method_exists($controller, "hookCheckDelete")) {
-                $controller->hookCheckDelete($this->selected);
+            // 컨트롤러 메서드 호출
+            if(isset($this->actions['controller'])) {
+                $controller = $this->actions['controller']::getInstance($this);
+                if(method_exists($controller, "hookCheckDelete")) {
+                    $controller->hookCheckDelete($this->selected);
+                }
             }
+
+            // 복수의 ids를 삭제합니다.
+            DB::table($this->actions['table'])->whereIn('id', $this->selected)->delete();
+
+            ## 페이지목록 수 변경시,
+            ## 기존에 선택된 체크박스는 초기화 함.
+            $this->selectedall = false;
+            $this->selected = [];
+
+            $this->popupDeleteClose();
+
+        } else {
+            $this->popupPermitOpen();
         }
-
-        // 복수의 ids를 삭제합니다.
-        DB::table($this->actions['table'])->whereIn('id', $this->selected)->delete();
-
-        ## 페이지목록 수 변경시,
-        ## 기존에 선택된 체크박스는 초기화 함.
-        $this->selectedall = false;
-        $this->selected = [];
-
-        $this->popupDeleteClose();
     }
 
 }

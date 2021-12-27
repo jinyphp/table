@@ -16,6 +16,7 @@ class ConfigController extends Controller
 {
     // 리소스 저장경로
     const PATH = "actions";
+    const MENU_PATH = "menus";
     protected $actions = [];
 
     public function __construct()
@@ -32,6 +33,19 @@ class ConfigController extends Controller
         $path = resource_path( $conf['path'] ?? self::PATH);
         foreach ($this->readJsonAction($path) as $key => $value) {
             $this->actions[$key] = $value;
+        }
+
+        // 메뉴 설정
+        $user = Auth::user();
+        if(isset($user->menu)) {
+            ## 사용자 지정메뉴 우선설정
+            xMenu()->setPath($user->menu);
+        } else {
+            ## 설정에서 적용한 메뉴
+            if(isset($this->actions['menu'])) {
+                $menuid = _getKey($this->actions['menu']);
+                xMenu()->setPath(self::MENU_PATH.DIRECTORY_SEPARATOR.$menuid.".json");
+            }
         }
     }
 

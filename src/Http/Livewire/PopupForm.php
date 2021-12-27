@@ -4,6 +4,7 @@ namespace Jiny\Table\Http\Livewire;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Storage;
@@ -21,8 +22,28 @@ class PopupForm extends Component
     public $actions;
     public $form=[];
 
+    //public $auth;
+    public $mode;
     private $controller;
 
+    public $permit;
+    public $popupPermit = false;
+    public function mount()
+    {
+        $user = Auth::user();
+        $Role = new \Jiny\Auth\Roles($user->id);
+        $this->permit = $Role->permitAll($this->actions);
+    }
+
+    public function popupPermitOpen()
+    {
+        $this->popupPermit = true;
+    }
+
+    public function popupPermitClose()
+    {
+        $this->popupPermit = false;
+    }
 
     public function render()
     {
@@ -57,52 +78,61 @@ class PopupForm extends Component
      */
     public function create($value=null)
     {
-        // 컨트롤러 메서드 호출
-        if ($controller = $this->isHook("hookCreating")) {
-            $controller->hookCreating($value);
-        }
+        if($this->permit['create']) {
+            // 컨트롤러 메서드 호출
+            if ($controller = $this->isHook("hookCreating")) {
+                $controller->hookCreating($value);
+            }
 
-        unset($this->actions['id']);
-        $this->popupFormOpen();
+            unset($this->actions['id']);
+            $this->popupFormOpen();
+        } else {
+            $this->popupPermitOpen();
+        }
     }
 
     public function store()
     {
-        //유효성 검사
-        if (isset($this->actions['validate'])) {
-            $validator = Validator::make($this->form, $this->actions['validate'])->validate();
-        }
+        if($this->permit['create']) {
 
-        // 시간정보 생성
-        $this->form['created_at'] = date("Y-m-d H:i:s");
-        $this->form['updated_at'] = date("Y-m-d H:i:s");
+            //유효성 검사
+            if (isset($this->actions['validate'])) {
+                $validator = Validator::make($this->form, $this->actions['validate'])->validate();
+            }
 
-        // 컨트롤러 메서드 호출
-        if ($controller = $this->isHook("hookStoring")) {
-            $form = $controller->hookStoring($this->form);
+            // 시간정보 생성
+            $this->form['created_at'] = date("Y-m-d H:i:s");
+            $this->form['updated_at'] = date("Y-m-d H:i:s");
+
+            // 컨트롤러 메서드 호출
+            if ($controller = $this->isHook("hookStoring")) {
+                $form = $controller->hookStoring($this->form);
+            } else {
+                $form = $this->form;
+            }
+
+            // 데이터 삽입
+            if($form) {
+                $id = DB::table($this->actions['table'])->insertGetId($form);
+            }
+
+            // 컨트롤러 메서드 호출
+            if ($controller = $this->isHook("hookStored")) {
+                $form = $controller->hookStored($this->form);
+            }
+
+            // 입력데이터 초기화
+            $this->cancel();
+
+            // 팝업창 닫기
+            $this->popupFormClose();
+
+            // Livewire Table을 갱신을 호출합니다.
+            $this->emit('refeshTable');
+
         } else {
-            $form = $this->form;
+            $this->popupPermitOpen();
         }
-
-        // 데이터 삽입
-        if($form) {
-            $id = DB::table($this->actions['table'])->insertGetId($form);
-        }
-
-        // 컨트롤러 메서드 호출
-        if ($controller = $this->isHook("hookStored")) {
-            $form = $controller->hookStored($this->form);
-        }
-
-        // 입력데이터 초기화
-        $this->cancel();
-
-        // 팝업창 닫기
-        $this->popupFormClose();
-
-        // Livewire Table을 갱신을 호출합니다.
-        $this->emit('refeshTable');
-
     }
 
     /**
@@ -119,25 +149,30 @@ class PopupForm extends Component
      */
     public function edit($id)
     {
-        $this->popupFormOpen();
+        if($this->permit['update']) {
+            $this->popupFormOpen();
 
-        if($id) {
-            $this->actions['id'] = $id;
-        }
+            if($id) {
+                $this->actions['id'] = $id;
+            }
 
-        // 컨트롤러 메서드 호출
-        if ($controller = $this->isHook("hookEditing")) {
-            $this->form = $controller->hookEditing($this->form);
-        }
+            // 컨트롤러 메서드 호출
+            if ($controller = $this->isHook("hookEditing")) {
+                $this->form = $controller->hookEditing($this->form);
+            }
 
-        if (isset($this->actions['id'])) {
-            $row = DB::table($this->actions['table'])->find($this->actions['id']);
-            $this->setForm($row);
-        }
+            if (isset($this->actions['id'])) {
+                $row = DB::table($this->actions['table'])->find($this->actions['id']);
+                $this->setForm($row);
+            }
 
-        // 컨트롤러 메서드 호출
-        if ($controller = $this->isHook("hookEdited")) {
-            $this->form = $controller->hookEdited($this->form);
+            // 컨트롤러 메서드 호출
+            if ($controller = $this->isHook("hookEdited")) {
+                $this->form = $controller->hookEdited($this->form);
+            }
+        } else {
+
+            $this->popupPermitOpen();
         }
     }
 
@@ -150,53 +185,58 @@ class PopupForm extends Component
 
     public function update()
     {
-        // step1. 수정전, 원본 데이터 읽기
-        $origin = DB::table($this->actions['table'])->find($this->actions['id']);
+        if($this->permit['update']) {
+            // step1. 수정전, 원본 데이터 읽기
+            $origin = DB::table($this->actions['table'])->find($this->actions['id']);
 
-        // step2. 유효성 검사
-        if (isset($this->actions['validate'])) {
-            $validator = Validator::make($this->form, $this->actions['validate'])->validate();
-        }
-
-        // step3. 컨트롤러 메서드 호출
-        if ($controller = $this->isHook("hookUpdating")) {
-            $this->form = $controller->hookUpdating($this->form);
-        }
-
-
-        // step4. 파일 업로드 체크
-        $this->fileUpload();
-        // uploadfile 필드 조회
-        $fields = DB::table('uploadfile')->where('table', $this->actions['table'])->get();
-        foreach($fields as $item) {
-            $key = $item->field; // 업로드 필드명
-            if($origin->$key != $this->form[$key]) {
-                ## 이미지를 수정하는 경우, 기존 이미지는 삭제합니다.
-                Storage::delete($origin->$key);
+            // step2. 유효성 검사
+            if (isset($this->actions['validate'])) {
+                $validator = Validator::make($this->form, $this->actions['validate'])->validate();
             }
+
+            // step3. 컨트롤러 메서드 호출
+            if ($controller = $this->isHook("hookUpdating")) {
+                $this->form = $controller->hookUpdating($this->form);
+            }
+
+
+            // step4. 파일 업로드 체크
+            $this->fileUpload();
+            // uploadfile 필드 조회
+            $fields = DB::table('uploadfile')->where('table', $this->actions['table'])->get();
+            foreach($fields as $item) {
+                $key = $item->field; // 업로드 필드명
+                if($origin->$key != $this->form[$key]) {
+                    ## 이미지를 수정하는 경우, 기존 이미지는 삭제합니다.
+                    Storage::delete($origin->$key);
+                }
+            }
+
+
+            // step5. 데이터 수정
+            if($this->form) {
+                DB::table($this->actions['table'])
+                    ->where('id', $this->actions['id'])
+                    ->update($this->form);
+            }
+
+            // step6. 컨트롤러 메서드 호출
+            if ($controller = $this->isHook("hookUpdated")) {
+                $this->form = $controller->hookUpdated($this->form);
+            }
+
+            // 입력데이터 초기화
+            $this->cancel();
+
+            // 팝업창 닫기
+            $this->popupFormClose();
+
+            // Livewire Table을 갱신을 호출합니다.
+            $this->emit('refeshTable');
+        } else {
+
+            $this->popupPermitOpen();
         }
-
-
-        // step5. 데이터 수정
-        if($this->form) {
-            DB::table($this->actions['table'])
-                ->where('id', $this->actions['id'])
-                ->update($this->form);
-        }
-
-        // step6. 컨트롤러 메서드 호출
-        if ($controller = $this->isHook("hookUpdated")) {
-            $this->form = $controller->hookUpdated($this->form);
-        }
-
-        // 입력데이터 초기화
-        $this->cancel();
-
-        // 팝업창 닫기
-        $this->popupFormClose();
-
-        // Livewire Table을 갱신을 호출합니다.
-        $this->emit('refeshTable');
     }
 
 
@@ -209,45 +249,56 @@ class PopupForm extends Component
 
     public function deleteConfirm()
     {
-        $this->confirm = true;
+        if($this->permit['delete']) {
+            $this->confirm = true;
+        } else {
+            $this->popupFormClose();
+            $this->popupPermitOpen();
+        }
     }
 
     public function delete()
     {
-        $row = DB::table($this->actions['table'])->find($this->actions['id']);
+        if($this->permit['delete']) {
+            $row = DB::table($this->actions['table'])->find($this->actions['id']);
 
-        // 컨트롤러 메서드 호출
-        if ($controller = $this->isHook("hookDeleting")) {
-            $row = $controller->hookDeleting($row);
-        }
-
-        // uploadfile 필드 조회
-        $fields = DB::table('uploadfile')->where('table', $this->actions['table'])->get();
-        foreach($fields as $item) {
-            $key = $item->field; // 업로드 필드명
-            if (isset($row->$key)) {
-                Storage::delete($row->$key);
+            // 컨트롤러 메서드 호출
+            if ($controller = $this->isHook("hookDeleting")) {
+                $row = $controller->hookDeleting($row);
             }
+
+            // uploadfile 필드 조회
+            $fields = DB::table('uploadfile')->where('table', $this->actions['table'])->get();
+            foreach($fields as $item) {
+                $key = $item->field; // 업로드 필드명
+                if (isset($row->$key)) {
+                    Storage::delete($row->$key);
+                }
+            }
+
+            // 데이터 삭제
+            DB::table($this->actions['table'])
+                ->where('id', $this->actions['id'])
+                ->delete();
+
+            // 컨트롤러 메서드 호출
+            if ($controller = $this->isHook("hookDeleted")) {
+                $row = $controller->hookDeleted($row);
+            }
+
+            // 입력데이터 초기화
+            $this->cancel();
+
+            // 팝업창 닫기
+            $this->popupFormClose();
+
+            // Livewire Table을 갱신을 호출합니다.
+            $this->emit('refeshTable');
+
+        } else {
+            $this->popupFormClose();
+            $this->popupPermitOpen();
         }
-
-        // 데이터 삭제
-        DB::table($this->actions['table'])
-            ->where('id', $this->actions['id'])
-            ->delete();
-
-        // 컨트롤러 메서드 호출
-        if ($controller = $this->isHook("hookDeleted")) {
-            $row = $controller->hookDeleted($row);
-        }
-
-        // 입력데이터 초기화
-        $this->cancel();
-
-        // 팝업창 닫기
-        $this->popupFormClose();
-
-        // Livewire Table을 갱신을 호출합니다.
-        $this->emit('refeshTable');
     }
 
 
