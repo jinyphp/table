@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Auth;
 
 class ResourceController extends Controller
 {
+    use \Jiny\Table\Http\Livewire\Permit;
+
     // 리소스 저장경로
     const PATH = "actions";
     protected $actions = [];
@@ -33,6 +35,8 @@ class ResourceController extends Controller
         foreach ($this->readJsonAction($path) as $key => $value) {
             $this->actions[$key] = $value;
         }
+
+
     }
 
     private function readJsonAction($path)
@@ -70,10 +74,9 @@ class ResourceController extends Controller
      */
     public function index(Request $request)
     {
-        $user = Auth::user();
-        $Role = new \Jiny\Auth\Roles($user->id);
-        if ($Role->permit($this->actions, "read")) {
-
+        // 권한
+        $this->permitCheck();
+        if($this->permit['read']) {
             // 메인뷰 페이지...
             if (isset($this->actions['view_main'])) {
                 if (view()->exists($this->actions['view_main']))
@@ -92,6 +95,13 @@ class ResourceController extends Controller
             ]);
         }
 
+        /*
+        $user = Auth::user();
+        $Role = new \Jiny\Auth\Roles($user->id);
+        if ($Role->permit($this->actions, "read")) {
+        }
+        */
+
         // 권한 접속 실패
         return view("jinytable::error.permit",[
             'actions'=>$this->actions,
@@ -101,9 +111,9 @@ class ResourceController extends Controller
 
     public function show(Request $request, $id)
     {
-        $user = Auth::user();
-        $Role = new \Jiny\Auth\Roles($user->id);
-        if ($Role->permit($this->actions, "delete")) {
+        // 권한
+        $this->permitCheck();
+        if($this->permit['read']) {
 
         }
 
@@ -116,13 +126,12 @@ class ResourceController extends Controller
 
     public function create(Request $request)
     {
-        $user = Auth::user();
-        $Role = new \Jiny\Auth\Roles($user->id);
-        if ($Role->permit($this->actions, "create")) {
+        // 권한
+        $this->permitCheck();
+        if($this->permit['create']) {
             // 메인뷰 페이지...
             if (isset($this->actions['view_edit'])) {
                 $view = $this->actions['view_edit'];
-                //dd($view);
             } else {
                 $view = "jinytable::edit";
             }
@@ -131,6 +140,14 @@ class ResourceController extends Controller
                 'actions'=>$this->actions
             ]);
         }
+
+        /*
+        $user = Auth::user();
+        $Role = new \Jiny\Auth\Roles($user->id);
+        if ($Role->permit($this->actions, "create")) {
+
+        }
+        */
 
         // 권한 접속 실패
         return view("jinytable::error.permit",[
@@ -141,11 +158,19 @@ class ResourceController extends Controller
 
     public function store(Request $request)
     {
+        // 권한
+        $this->permitCheck();
+        if($this->permit['create']) {
+
+        }
+
+        /*
         $user = Auth::user();
         $Role = new \Jiny\Auth\Roles($user->id);
         if ($Role->permit($this->actions, "create")) {
 
         }
+        */
 
         // 권한 접속 실패
         return view("jinytable::error.permit",[
@@ -157,12 +182,20 @@ class ResourceController extends Controller
 
     public function edit(Request $request, $id)
     {
-        $user = Auth::user();
-        $Role = new \Jiny\Auth\Roles($user->id);
-        if ($Role->permit($this->actions, "update")) {
+        // 권한
+        $this->permitCheck();
+        if($this->permit['update']) {
             $this->actions['id'] = $id;
             return view("jinytable::edit",['actions'=>$this->actions]);
         }
+
+        /*
+        $user = Auth::user();
+        $Role = new \Jiny\Auth\Roles($user->id);
+        if ($Role->permit($this->actions, "update")) {
+
+        }
+        */
 
         // 권한 접속 실패
         return view("jinytable::error.permit",[
@@ -173,11 +206,18 @@ class ResourceController extends Controller
 
     public function update(Request $request, $id)
     {
+        // 권한
+        $this->permitCheck();
+        if($this->permit['update']) {
+        }
+
+        /*
         $user = Auth::user();
         $Role = new \Jiny\Auth\Roles($user->id);
         if ($Role->permit($this->actions, "update")) {
 
         }
+        */
 
         // 권한 접속 실패
         return view("jinytable::error.permit",[
@@ -188,11 +228,18 @@ class ResourceController extends Controller
 
     public function destroy($id, Request $request)
     {
+        // 권한
+        $this->permitCheck();
+        if($this->permit['delete']) {
+        }
+
+        /*
         $user = Auth::user();
         $Role = new \Jiny\Auth\Roles($user->id);
         if ($Role->permit($this->actions, "delete")) {
 
         }
+        */
 
         // 권한 접속 실패
         return view("jinytable::error.permit",[
@@ -209,14 +256,22 @@ class ResourceController extends Controller
      */
     public function delete(Request $request)
     {
-        $user = Auth::user();
-        $Role = new \Jiny\Auth\Roles($user->id);
-        if ($Role->permit($this->actions, "delete")) {
+        // 권한
+        $this->permitCheck();
+        if($this->permit['delete']) {
             $ids = $request->ids;
             // 선택한 항목 삭제 AJAX
             DB::table($this->tablename)->whereIn('id', $ids)->delete();
             return response()->json(['status'=>"200", 'ids'=>$ids]);
         }
+
+        /*
+        $user = Auth::user();
+        $Role = new \Jiny\Auth\Roles($user->id);
+        if ($Role->permit($this->actions, "delete")) {
+
+        }
+        */
 
         // 권한 접속 실패
         return response()->json(['status'=>"201",'message'=>"권한 설정없음"]);
