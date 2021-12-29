@@ -51,21 +51,24 @@ class JinyTableServiceProvider extends ServiceProvider
         $this->app->afterResolving(BladeCompiler::class, function () {
             // AlpineJS 를 이용항 Table
             Livewire::component('WireTable', \Jiny\Table\Http\Livewire\WireTable::class);
+            Livewire::component('WireForm', \Jiny\Table\Http\Livewire\WireForm::class); // 페이지 이동
+            Livewire::component('Popup-LiveForm', \Jiny\Table\Http\Livewire\PopupForm::class); // 팝업형
+            Livewire::component('Popup-LiveManual', \Jiny\Table\Http\Livewire\PopupManual::class);
 
-            // 페이지 이동
-            Livewire::component('WireForm', \Jiny\Table\Http\Livewire\WireForm::class);
+
+            Livewire::component('WireFiles', \Jiny\Table\Http\Livewire\WireFiles::class);
+            Livewire::component('WireFileEdit', \Jiny\Table\Http\Livewire\WireFileEdit::class);
+
 
             // Form => json 저장
             Livewire::component('WireConfig', \Jiny\Table\Http\Livewire\WireConfig::class);
 
-            // 팝업형
-            Livewire::component('Popup-LiveForm', \Jiny\Table\Http\Livewire\PopupForm::class);
-            Livewire::component('Popup-LiveManual', \Jiny\Table\Http\Livewire\PopupManual::class);
+            Livewire::component('setActionRule', \Jiny\Table\Http\Livewire\SetActionRule::class);
 
             // 데쉬보드
             Livewire::component('WireDashBoard', \Jiny\Table\Http\Livewire\WireDashBoard::class);
 
-            Livewire::component('setActionRule', \Jiny\Table\Http\Livewire\SetActionRule::class);
+
 
         });
     }

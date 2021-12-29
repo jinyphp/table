@@ -164,6 +164,18 @@
                         </x-form-item>
                     </x-form-hor>
 
+                    <hr>
+
+                    <x-form-hor>
+                        <x-form-label>파일명</x-form-label>
+                        <x-form-item>
+                            {!! xInputText()
+                                ->setWire('model.defer',"form.filename")
+                            !!}
+                            저장할 config 파일명을 지정합니다.
+                        </x-form-item>
+                    </x-form-hor>
+
                 </x-navtab-item>
 
                 <x-navtab-item >

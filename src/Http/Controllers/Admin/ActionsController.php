@@ -17,7 +17,6 @@ class ActionsController extends Controller
     public function index(Request $request)
     {
         $path = resource_path('actions');
-        //dd($path);
 
         $files = [];
         foreach (scandir($path) as $item) {
@@ -57,7 +56,5 @@ class ActionsController extends Controller
     {
 
     }
-
-
 
 }
