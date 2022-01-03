@@ -55,14 +55,14 @@ public function hookStored($form)
 ## 수정폼이 실행될때 호출됩니다.
 
 ```php
-public function hookEditing($form)
+public function hookEditing($form, $old)
 {
     return $form;
 }
 ```
 
 ```php
-public function hookEdited($form)
+public function hookEdited($form, $old)
 {
     return $form;
 }
@@ -70,6 +70,7 @@ public function hookEdited($form)
 
 ## 수정된 데이터가 DB에 적용되기 전에 호출됩니다.
 
+DB 테이블을 조작하기 전에 실행되는 후크동작입니다.
 ```php
 public function hookUpdating($form)
 {
@@ -77,6 +78,7 @@ public function hookUpdating($form)
 }
 ```
 
+DB 수정이 완료된 후에 실행되는 후크 메소드 입니다.
 ```php
 public function hookUpdated($form)
 {
@@ -91,6 +93,8 @@ delete 동작전, 선택하고자 하는 데이터를 읽어 매개변수로 전
 또한 결과도 같이 반환을 해야 합니다.
 
 ### delete 동작이 실행하기 전에 호출됩니다.
+
+db에서 데이터가 삭제되기 호출되는 후크 입니다.
 ```php
 public function hookDeleting($row)
 {
@@ -103,5 +107,15 @@ public function hookDeleting($row)
 public function hookDeleted($row)
 {
     return $row;
+}
+```
+
+
+### 선택삭제
+
+```php
+public function hookCheckDeleting($selected)
+{
+
 }
 ```

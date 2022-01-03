@@ -18,14 +18,9 @@ class WireTable extends Component
     use \Jiny\Table\Http\Livewire\Permit;
 
     public $actions;
+
+
     public $paging = 10;
-
-    public $filter=[];
-    public $ids = [];
-    public $data=[];
-    public $sort=[];
-
-
     public function mount()
     {
         $this->permitCheck();
@@ -37,8 +32,8 @@ class WireTable extends Component
     }
 
 
-    /**
-     * LiveListTable
+    /** ----- ----- ----- ----- -----
+     *  Table
      */
     public function render()
     {
@@ -49,11 +44,11 @@ class WireTable extends Component
 
         if(isset($this->actions['table']) && $this->actions['table']) {
 
-            $rows = $this->dbFetch($this->actions);
+            $rows = $this->dataFetch($this->actions);
 
             // 컨트롤러 메서드 호출
             if ($controller = $this->isHook("HookIndexed")) {
-                $controller->HookIndexed($rows);
+                $rows = $controller->HookIndexed($rows);
             }
 
             // 내부함수 생성
@@ -88,7 +83,14 @@ class WireTable extends Component
                 return $link;
             };
 
-            return view("jinytable::livewire.table",[
+            // 테이블 출력형식 레이아아웃
+            if(isset($this->actions['view_main_layout']) && $this->actions['view_main_layout']) {
+                $view_layout = $this->actions['view_main_layout'];
+            } else {
+                $view_layout = "jinytable::livewire.table";
+            }
+
+            return view($view_layout,[
                 'rows'=>$rows,
                 'popupEdit'=>$funcEditPopup,
                 'editLink'=>$funcEditLink
@@ -100,41 +102,66 @@ class WireTable extends Component
         }
     }
 
-
-    private function dbFetch($actions)
+    protected $listeners = ['refeshTable'];
+    public function refeshTable()
     {
-        // 테이블 설정
-        $DB = DB::table($this->actions['table']);
+        // 페이지를 재갱신 합니다.
+    }
 
-        // 제한조건 적용
-        if(isset($this->actions['where']) && is_array($this->actions['where'])) {
-            foreach ($this->actions['where'] as $key => $where) {
-                $DB->where($key,$where);
+    /** ----- ----- ----- ----- -----
+     *  Read Data
+     */
+
+    public $dataType = "table";
+    protected function dataFetch($actions)
+    {
+        if(isset($this->actions['table']) && $this->actions['table']) {
+            //  1.테이블 설정
+            $DB = DB::table($this->actions['table']);
+
+            //  2.제한조건 적용
+            if(isset($this->actions['where']) && is_array($this->actions['where'])) {
+                foreach ($this->actions['where'] as $key => $where) {
+                    $DB->where($key,$where);
+                }
             }
-        }
 
-        // 사용자필터 조건적용
-        foreach ($this->filter as $key => $filter) {
-            $DB->where($key,'like','%'.$filter.'%');
-        }
-
-        // Sort
-        if (empty($this->sort)) {
-            $DB->orderBy('id',"desc");
-        } else {
-            foreach($this->sort as $key => $value) {
-                $DB->orderBy($key, $value);
+            //  3.사용자필터 조건적용
+            foreach ($this->filter as $key => $filter) {
+                $DB->where($key,'like','%'.$filter.'%');
             }
+
+            //  4.Sort
+            if (empty($this->sort)) {
+                $DB->orderBy('id',"desc");
+            } else {
+                foreach($this->sort as $key => $value) {
+                    $DB->orderBy($key, $value);
+                }
+            }
+
+            //  5.최종 데이터 읽기
+            //  페이징이 없는 경우, 전체 읽기
+            if(isset($this->paging) && is_numeric($this->paging) ) {
+                $rows = $DB->paginate($this->paging);
+            } else {
+                $rows = $DB->get();
+            }
+
+            //  6.
+            $this->setData($rows);
+            $this->setIds();
+
+            // session()->flash('message',"데이터...");
+            return $rows;
         }
 
-        // 최종 데이터 읽기
-        // 페이징이 없는 경우, 전체 읽기
-        if(isset($this->paging) && is_numeric($this->paging) ) {
-            $rows = $DB->paginate($this->paging);
-        } else {
-            $rows = $DB->get();
-        }
+        return [];
+    }
 
+    public $data=[];
+    protected function setData($rows)
+    {
         $this->data = [];
         foreach($rows as $i => $item) {
             foreach($item as $k => $v) {
@@ -142,17 +169,20 @@ class WireTable extends Component
             }
         }
 
+        return $this;
+    }
+
+    public $ids = [];
+    protected function setIds()
+    {
         $this->ids = [];
         foreach($this->data as $i => $item) {
             $this->ids[$i] = $item['id'];
         }
-
-        //session()->flash('message',"데이터...");
-        return $rows;
     }
 
-
-    ## 정렬
+    # 컬럼 필드 정렬 적용
+    public $sort=[];
     public function orderBy($key)
     {
         if (isset($this->sort[$key])) {
@@ -168,7 +198,6 @@ class WireTable extends Component
         }
     }
 
-
     public function getOrderBy($key)
     {
         if (isset($this->sort[$key])) {
@@ -176,23 +205,22 @@ class WireTable extends Component
         }
     }
 
-
     private function sortClear()
     {
         $this->sort = [];
     }
 
 
-    ## 검색
+    # 검색
+    public $filter=[];
     public function filter_search()
     {
         // 선택항목 초기화
         $this->selectedall = false;
         $this->selected = [];
 
-        //session()->flash('message',"데이터 검색");
+        // session()->flash('message',"데이터 검색");
     }
-
 
     public function filter_reset()
     {
@@ -201,21 +229,14 @@ class WireTable extends Component
     }
 
 
-    protected $listeners = ['refeshTable'];
-    public function refeshTable()
-    {
-        ## 페이지를 재갱신 합니다.
-    }
-
-
-    /**
-     * 체크박스
+    /** ----- ----- ----- ----- -----
+     *  checkBox Selecting
      */
+
     public $selectedall = false;
     public $selected = [];
 
-
-    // Livewire Hook
+    # Livewire Hook
     public function updatedSelectedall($value)
     {
         if($value) {
@@ -228,8 +249,7 @@ class WireTable extends Component
         }
     }
 
-
-    // Livewire Hook
+    # Livewire Hook
     public function updatedSelected($value)
     {
         if(count($this->selected) == count($this->ids)) {
@@ -239,21 +259,23 @@ class WireTable extends Component
         }
     }
 
-
-    // Livewire Hook
+    # Livewire Hook
     public function updatedPaging($value)
     {
-        ## 페이지목록 수 변경시,
-        ## 기존에 선택된 체크박스는 초기화 함.
+        // 페이지목록 수 변경시,
+        // 기존에 선택된 체크박스는 초기화 함.
         $this->selectedall = false;
         $this->selected = [];
     }
 
 
-    /**
-     * 선택삭제 팝업창
+    /** ----- ----- ----- ----- -----
+     *  delete
      */
+
+    # 선택삭제 팝업창
     public $popupDelete = false;
+
     public function popupDeleteOpen()
     {
         if($this->permit['delete']) {
@@ -263,19 +285,30 @@ class WireTable extends Component
         }
     }
 
-
     public function popupDeleteClose()
     {
         // 삭제 확인창을 닫기
         $this->popupDelete = false;
     }
 
+    public function confirmDelete()
+    {
+        $this->checkeDelete();
+    }
 
     public function checkeDelete()
     {
         if($this->permit['delete']) {
 
-            // uploadfile 필드 조회
+            // 1.컨트롤러 메서드 호출
+            if(isset($this->actions['controller'])) {
+                $controller = $this->actions['controller']::getInstance($this);
+                if(method_exists($controller, "hookCheckDeleting")) {
+                    $controller->hookCheckDeleting($this->selected);
+                }
+            }
+
+            // 2.uploadfile 필드 조회
             $fields = DB::table('uploadfile')->where('table', $this->actions['table'])->get();
             $rows = DB::table($this->actions['table'])->whereIn('id', $this->selected)->get();
             foreach ($rows as $row) {
@@ -287,19 +320,26 @@ class WireTable extends Component
                 }
             }
 
+            // 3.복수의 ids를 삭제합니다.
+            if($this->dataType == "table") {
+                DB::table($this->actions['table'])->whereIn('id', $this->selected)->delete();
+            } else if($this->dataType == "uri") {
+
+            } else if($this->dataType == "file") {
+
+            }
+
+
             // 컨트롤러 메서드 호출
             if(isset($this->actions['controller'])) {
                 $controller = $this->actions['controller']::getInstance($this);
-                if(method_exists($controller, "hookCheckDelete")) {
-                    $controller->hookCheckDelete($this->selected);
+                if(method_exists($controller, "hookCheckDeleted")) {
+                    $controller->hookCheckDeleted($this->selected);
                 }
             }
 
-            // 복수의 ids를 삭제합니다.
-            DB::table($this->actions['table'])->whereIn('id', $this->selected)->delete();
-
-            ## 페이지목록 수 변경시,
-            ## 기존에 선택된 체크박스는 초기화 함.
+            // 4.페이지목록 수 변경시,
+            // 기존에 선택된 체크박스는 초기화 함.
             $this->selectedall = false;
             $this->selected = [];
 

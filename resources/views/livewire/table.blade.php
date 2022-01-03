@@ -5,7 +5,6 @@
 
     <x-loading-indicator/>
 
-
     {{-- 필터를 적용시 filter.blade.php 를 읽어 옵니다. --}}
     @if (isset($actions['view_filter']))
         @includeIf($actions['view_filter'])

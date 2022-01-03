@@ -55,6 +55,8 @@ class JinyTableServiceProvider extends ServiceProvider
             Livewire::component('Popup-LiveForm', \Jiny\Table\Http\Livewire\PopupForm::class); // 팝업형
             Livewire::component('Popup-LiveManual', \Jiny\Table\Http\Livewire\PopupManual::class);
 
+            Livewire::component('JsonTable', \Jiny\Table\Http\Livewire\JsonTable::class);
+
 
             Livewire::component('WireFiles', \Jiny\Table\Http\Livewire\WireFiles::class);
             Livewire::component('WireFileEdit', \Jiny\Table\Http\Livewire\WireFileEdit::class);

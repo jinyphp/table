@@ -57,11 +57,16 @@ class SetActionRule extends Component
 
         $this->form['updated_at'] = date("Y-m-d H:i:s");
 
+        // json 포맷으로 데이터 변환
         $json = json_encode($this->form,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
         $path = resource_path("actions");
         if(!is_dir($path)) mkdir($path);
 
+
+
+
         $filename = $path.DIRECTORY_SEPARATOR.str_replace("/","_",$this->actions['route']['uri']).".json";
+        //dd($filename);
         file_put_contents($filename, $json);
 
         $this->popupRuleClose();

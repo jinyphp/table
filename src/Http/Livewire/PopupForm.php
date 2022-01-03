@@ -36,10 +36,10 @@ class PopupForm extends Component
         return view("jinytable::livewire.popup.form");
     }
 
-
-    /**
-     * 팝업창 관리
+    /** ----- ----- ----- ----- -----
+     *  팝업창 관리
      */
+
     protected $listeners = ['popupFormOpen','popupFormClose','popupFormCreate','edit'];
     public $popupForm = false;
     public function popupFormOpen()
@@ -59,9 +59,10 @@ class PopupForm extends Component
     }
 
 
-    /**
-     * 신규 데이터 삽입
+    /** ----- ----- ----- ----- -----
+     *  신규 데이터 삽입
      */
+
     public function create($value=null)
     {
         if($this->permit['create']) {
@@ -90,12 +91,17 @@ class PopupForm extends Component
             $this->form['created_at'] = date("Y-m-d H:i:s");
             $this->form['updated_at'] = date("Y-m-d H:i:s");
 
+            // step4. 파일 업로드 체크
+            //
+            $this->fileUpload();
+
             // 컨트롤러 메서드 호출
             if ($controller = $this->isHook("hookStoring")) {
                 $form = $controller->hookStoring($this->form);
             } else {
                 $form = $this->form;
             }
+
 
             // 데이터 삽입
             if($form) {
@@ -121,18 +127,17 @@ class PopupForm extends Component
         }
     }
 
-    /**
-     * 취소 및 form 입력항목 초기화
-     */
+    // 취소 및 form 입력항목 초기화
     public function cancel()
     {
         $this->form = [];
     }
 
 
-    /**
-     * 데이터 수정
+    /** ----- ----- ----- ----- -----
+     *  데이터 수정
      */
+
     public function edit($id)
     {
         if($this->permit['update']) {
@@ -169,11 +174,23 @@ class PopupForm extends Component
         }
     }
 
+    public $old=[];
+    public function getOld($key=null)
+    {
+        if ($key) {
+            return $this->old[$key];
+        }
+        return $this->old;
+    }
+
     public function update()
     {
         if($this->permit['update']) {
             // step1. 수정전, 원본 데이터 읽기
             $origin = DB::table($this->actions['table'])->find($this->actions['id']);
+            foreach ($origin as $key => $value) {
+                $this->old[$key] = $value;
+            }
 
             // step2. 유효성 검사
             if (isset($this->actions['validate'])) {
@@ -226,11 +243,10 @@ class PopupForm extends Component
     }
 
 
-    /**
-     * 데이터 삭제 동작
-     * 삭제는 2단계로 동작합니다. 삭제 버튼을 클릭하면, 실제 동작 버튼이 활성화 됩니다.
+    /** ----- ----- ----- ----- -----
+     *  데이터 삭제 동작
+     *  삭제는 2단계로 동작합니다. 삭제 버튼을 클릭하면, 실제 동작 버튼이 활성화 됩니다.
      */
-
     public $confirm = false;
 
     public function deleteConfirm()
@@ -288,9 +304,10 @@ class PopupForm extends Component
     }
 
 
-    /**
-     * 파일 업로드
+    /** ----- ----- ----- ----- -----
+     *  파일 업로드
      */
+
     public function fileUpload()
     {
         // 테이블명과 동일한 폴더에 저장

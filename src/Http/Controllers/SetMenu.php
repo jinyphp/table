@@ -7,11 +7,11 @@ trait SetMenu
 
     protected function setUserMenu($user)
     {
+        // 사용자가 있는 경우 사용자 메뉴 적용
         if(isset($user->menu)) {
-            ## 사용자 지정메뉴 우선설정
             xMenu()->setPath($user->menu);
         } else {
-            ## 설정에서 적용한 메뉴
+            // Actions에서 적용한 메뉴
             if(isset($this->actions['menu'])) {
                 $menuid = _getKey($this->actions['menu']);
                 xMenu()->setPath($this->MENU_PATH . DIRECTORY_SEPARATOR . $menuid . ".json");
