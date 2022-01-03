@@ -45,11 +45,14 @@ public function hookStoring($form)
 }
 ```
 
+`hookStored` 는 DB에 새로운 데이터를 삽입이 성공되었을 때 동작하는
+후크메소드 입니다. 입력한 form 데이터와 삽입한 마지막 id값을 같이 전달 받습니다.
+ 
 ```php
-public function hookStored($form)
-{
-    return $form;
-}
+    public function hookStored($form, $id)
+    {
+
+    }
 ```
 
 ## 수정폼이 실행될때 호출됩니다.

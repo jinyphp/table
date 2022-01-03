@@ -106,12 +106,14 @@ class PopupForm extends Component
             // 데이터 삽입
             if($form) {
                 $id = DB::table($this->actions['table'])->insertGetId($form);
+
+                // 컨트롤러 메서드 호출
+                if ($controller = $this->isHook("hookStored")) {
+                    $controller->hookStored($this->form, $id);
+                }
             }
 
-            // 컨트롤러 메서드 호출
-            if ($controller = $this->isHook("hookStored")) {
-                $form = $controller->hookStored($this->form);
-            }
+
 
             // 입력데이터 초기화
             $this->cancel();
