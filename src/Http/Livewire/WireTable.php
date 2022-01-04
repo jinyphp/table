@@ -49,6 +49,12 @@ class WireTable extends Component
             // 컨트롤러 메서드 호출
             if ($controller = $this->isHook("HookIndexed")) {
                 $rows = $controller->HookIndexed($rows);
+
+                if(is_null($rows)) {
+                    return view("jinytable::error.message",[
+                        'message'=>"HookIndexed() 호출 반환값이 없습니다."
+                    ]);
+                }
             }
 
             // 내부함수 생성

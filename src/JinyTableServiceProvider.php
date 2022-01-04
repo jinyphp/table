@@ -67,8 +67,7 @@ class JinyTableServiceProvider extends ServiceProvider
 
             Livewire::component('setActionRule', \Jiny\Table\Http\Livewire\SetActionRule::class);
 
-            // 데쉬보드
-            Livewire::component('WireDashBoard', \Jiny\Table\Http\Livewire\WireDashBoard::class);
+
 
 
 
