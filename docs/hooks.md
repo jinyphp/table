@@ -9,17 +9,46 @@
 데이터를 패치하기 전에 설정해야 되는 동작과 데이터를 패치 이후에 동작해야 하는 hook입니다.
 
 ### 패치전 동작하는 hook
-목록을 검색하기 전에 livewire에 값을 설정해 주어야 하는 경우가 있습니다. 이때에는 `hookIndexing()` 메소드를
-선언합니다. 이 메소드가 먼저 실행된 후에, 실제 dbfetch 작업이 실행됩니다.
+목록을 검색하기 전에 livewire에 값을 설정해 주어야 하는 경우가 있습니다. 
+이때에는 `hookIndexing()` 메소드를 선언합니다. 이 메소드가 먼저 실행된 후에, 실제 dbfetch 작업이 실행됩니다.
 
+정상동작
 ```php
 public function hookIndexing()
 {
-
 }
 ```
 
+비정상동작
+`hookIndexing`는 보통 nested된 데이터를 조회할 경우 많이 사용됩니다. 만일 사전 데이터 설정시 오류로 인하여
+index 동작을 제한해야 하는 경우 반환값을 지정합니다. `hookIndexing` 반환값이 있는 경우, 다음 스텝의 동작을
+진행하지 않습니다.
+ex)
+```php
+public function hookIndexing()
+    {
+        if($user = Auth::user()) {
+            $email = $user->email;
+            $row = DB::table('hr_employee')->where('email', $email)->first();
+
+            $this->wire->actions['where'] = [
+                'employee' => ['like'=>$row->id.":%"]
+            ];
+
+            return false;
+        }
+
+        return view("jinytable::error.message",[
+            'message'=>"오류가 있습니다."
+        ]);
+    }
+```
+
+
 ### 데이터 fetch후 호출 됩니다.
+`hookIndexed`는 DB 테이블을 조회한 `rows` 값을 전달 받습니다. 전달받은 rows 값을 이용하여
+후작업 후킹을 할 수 있습니다. 작업후에는 반드시 다시 `rows`값을 리턴해 주어야만 결과를 출력할 수 있습니다.
+
 ```php
 public function hookIndexed($rows)
 {

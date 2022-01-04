@@ -39,7 +39,10 @@ class WireTable extends Component
     {
         // 컨트롤러 메서드 호출
         if ($controller = $this->isHook("HookIndexing")) {
-            $controller->HookIndexing();
+            $result = $controller->HookIndexing();
+            if($result) {
+                return $result;
+            }
         }
 
         if(isset($this->actions['table']) && $this->actions['table']) {
@@ -125,12 +128,22 @@ class WireTable extends Component
             //  1.테이블 설정
             $DB = DB::table($this->actions['table']);
 
+            //dump($this->actions['where']);
             //  2.제한조건 적용
             if(isset($this->actions['where']) && is_array($this->actions['where'])) {
                 foreach ($this->actions['where'] as $key => $where) {
-                    $DB->where($key,$where);
+                    if(is_array($where)) {
+                        foreach($where as $t => $v) {
+                            $DB->where($key, $t, $v);
+                        }
+                    } else {
+                        $DB->where($key,$where);
+                    }
                 }
             }
+
+            //$DB->dd();
+
 
             //  3.사용자필터 조건적용
             foreach ($this->filter as $key => $filter) {
