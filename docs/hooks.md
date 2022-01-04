@@ -14,7 +14,7 @@
 
 정상동작
 ```php
-public function hookIndexing()
+public function hookIndexing($wire)
 {
 }
 ```
@@ -25,7 +25,7 @@ index 동작을 제한해야 하는 경우 반환값을 지정합니다. `hookIn
 진행하지 않습니다.
 ex)
 ```php
-public function hookIndexing()
+public function hookIndexing($wire)
     {
         if($user = Auth::user()) {
             $email = $user->email;
@@ -50,7 +50,7 @@ public function hookIndexing()
 후작업 후킹을 할 수 있습니다. 작업후에는 반드시 다시 `rows`값을 리턴해 주어야만 결과를 출력할 수 있습니다.
 
 ```php
-public function hookIndexed($rows)
+public function hookIndexed($wire, $rows)
 {
     //$this->wire->aaa = "hello";
     return $rows;
@@ -59,7 +59,7 @@ public function hookIndexed($rows)
 
 ## 생성폼이 실행될때 호출됩니다.
 ```php
-public function hookCreating()
+public function hookCreating($wire, $value)
 {
 
 }

@@ -20,7 +20,7 @@ index는 지정된 테이블의 데이터를 읽어 처리합니다.
 만일 테이블을 읽고 처리한후에 후작업이 필요한 경우 후크를 설정할 수 있습니다.
 
 ```php
-public function hookCreating($value)
+public function hookCreating($wire, $value)
     {
 
     }

@@ -37,10 +37,19 @@ class WireTable extends Component
      */
     public function render()
     {
+        if(isset($this->actions['table']) && $this->actions['table']) {
+            $this->setTable($this->actions['table']);
+        } else {
+            // 테이블명이 없는 경우
+            return view("jinytable::error.tablename_none");
+        }
+
+
         // 컨트롤러 메서드 호출
         if ($controller = $this->isHook("HookIndexing")) {
-            $result = $controller->HookIndexing();
+            $result = $controller->HookIndexing($this);
             if($result) {
+                // 반환값이 있는 경우, 출력하고 이후동작을 중단함.
                 return $result;
             }
         }
@@ -48,17 +57,20 @@ class WireTable extends Component
         if(isset($this->actions['table']) && $this->actions['table']) {
 
             $rows = $this->dataFetch($this->actions);
+            if($rows) {
+                // 컨트롤러 메서드 호출
+                if ($controller = $this->isHook("HookIndexed")) {
+                    $rows = $controller->HookIndexed($this, $rows);
 
-            // 컨트롤러 메서드 호출
-            if ($controller = $this->isHook("HookIndexed")) {
-                $rows = $controller->HookIndexed($rows);
-
-                if(is_null($rows)) {
-                    return view("jinytable::error.message",[
-                        'message'=>"HookIndexed() 호출 반환값이 없습니다."
-                    ]);
+                    if(is_null($rows)) {
+                        return view("jinytable::error.message",[
+                            'message'=>"HookIndexed() 호출 반환값이 없습니다."
+                        ]);
+                    }
                 }
             }
+
+
 
             // 내부함수 생성
             // 팝업창 폼을 활성화 합니다.
@@ -105,9 +117,6 @@ class WireTable extends Component
                 'editLink'=>$funcEditLink
             ]);
 
-        } else {
-            // 테이블명이 없는 경우
-            return view("jinytable::error.tablename_none");
         }
     }
 
@@ -120,37 +129,38 @@ class WireTable extends Component
     /** ----- ----- ----- ----- -----
      *  Read Data
      */
-
     public $dataType = "table";
+    protected $dbSelect;
+    public function setTable($table)
+    {
+        // 외부 별도 클래스로 처리
+        $this->dbSelect = new \Jiny\Table\Database\Select($table);
+        return $this;
+    }
+    public function DB()
+    {
+        return $this->dbSelect->DB;
+    }
     protected function dataFetch($actions)
     {
-        if(isset($this->actions['table']) && $this->actions['table']) {
-            //  1.테이블 설정
-            $DB = DB::table($this->actions['table']);
-
-            //dump($this->actions['where']);
+        $DB = $this->DB();
+        if($DB) {
             //  2.제한조건 적용
             if(isset($this->actions['where']) && is_array($this->actions['where'])) {
-                foreach ($this->actions['where'] as $key => $where) {
-                    if(is_array($where)) {
-                        foreach($where as $t => $v) {
-                            $DB->where($key, $t, $v);
-                        }
-                    } else {
-                        $DB->where($key,$where);
-                    }
-                }
+                $this->dbSelect->wheres($this->actions['where']);
             }
 
-            //$DB->dd();
-
-
             //  3.사용자필터 조건적용
+            /*
             foreach ($this->filter as $key => $filter) {
                 $DB->where($key,'like','%'.$filter.'%');
             }
+            */
+            $this->dbSelect->filters($this->filter);
+
 
             //  4.Sort
+            /*
             if (empty($this->sort)) {
                 $DB->orderBy('id',"desc");
             } else {
@@ -158,13 +168,15 @@ class WireTable extends Component
                     $DB->orderBy($key, $value);
                 }
             }
+            */
+            $this->dbSelect->sort($this->sort);
 
             //  5.최종 데이터 읽기
             //  페이징이 없는 경우, 전체 읽기
             if(isset($this->paging) && is_numeric($this->paging) ) {
-                $rows = $DB->paginate($this->paging);
+                $rows = $this->dbSelect->paginate($this->paging);
             } else {
-                $rows = $DB->get();
+                $rows = $this->dbSelect->get();
             }
 
             //  6.

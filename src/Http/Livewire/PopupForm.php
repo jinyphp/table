@@ -68,7 +68,7 @@ class PopupForm extends Component
         if($this->permit['create']) {
             // 컨트롤러 메서드 호출
             if ($controller = $this->isHook("hookCreating")) {
-                $controller->hookCreating($value);
+                $controller->hookCreating($this, $value);
             }
 
             unset($this->actions['id']);

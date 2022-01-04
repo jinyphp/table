@@ -47,7 +47,7 @@ class WireConfig extends Component
         if(isset($this->actions['controller'])) {
             $controller = $this->actions['controller']::getInstance($this);
             if(method_exists($controller, "hookCreating")) {
-                $controller->hookCreating();
+                $controller->hookCreating($this);
             }
         }
 
