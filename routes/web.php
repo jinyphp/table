@@ -2,13 +2,13 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
-Route::get('/images/public/{path}/{filename}',[\Jiny\Table\Http\Controllers\ImageView::class,"index"])->name("images.public");
+Route::get('/images/public/{path}/{filename}',[\Jiny\Table\API\Controllers\ImageView::class,"index"])->name("images.public");
 
 // 업로드한 이미지 보기
 Route::middleware(['web','auth:sanctum', 'verified'])
 ->name('image.')
 ->prefix('/images')->group(function () {
-    Route::get('/private/{path}/{filename}',[\Jiny\Table\Http\Controllers\ImageView::class,"index"]);
+    Route::get('/private/{path}/{filename}',[\Jiny\Table\API\Controllers\ImageView::class,"index"]);
 });
 
 

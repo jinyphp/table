@@ -2,7 +2,7 @@
 /**
  * 이미지를 출력합니다.
  */
-namespace Jiny\Table\Http\Controllers;
+namespace Jiny\Table\API\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
