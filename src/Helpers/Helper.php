@@ -42,6 +42,16 @@ if (!function_exists("xWireLink")) {
     }
 }
 
+/**
+ * 빌더
+ */
+if(!function_exists("xFormBuilder")) {
+    function xFormBuilder($actions, $type=null) {
+        return (new \Jiny\Table\FormBuilder($actions))->make($type);
+    }
+}
+
+
 /** ----- ----- ----- ----- -----
  *  Cell Functions
  */
