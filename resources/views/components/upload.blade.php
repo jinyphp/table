@@ -17,7 +17,7 @@
     x-on:livewire-upload-progress="progress = $event.detail.progress"
     >
     <!-- File Input -->
-    <input type="file" name="filename" wire:model.defer="form.image1" class="form-control"/>
+    <input type="file" name="filename" wire:model.defer="forms.image1" class="form-control"/>
 
     <!-- Progress Bar -->
     <div x-show="isUploading">

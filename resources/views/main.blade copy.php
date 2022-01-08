@@ -1,7 +1,6 @@
 {{-- 목록을 출력하기 위한 템플릿 --}}
 <x-theme theme="admin.sidebar2">
     <x-theme-layout>
-
         <!-- start page title -->
         @if (isset($actions['view_title']) && !empty($actions['view_title']))
             @includeIf($actions['view_title'])
@@ -9,6 +8,7 @@
             @include("jinytable::title")
         @endif
         <!-- end page title -->
+
 
         <div class="relative">
             <div class="absolute right-0 bottom-4">
@@ -34,11 +34,13 @@
         </script>
         @endpush
 
+
         @livewire('WireTable', ['actions'=>$actions])
 
         @livewire('Popup-LiveForm', ['actions'=>$actions])
 
         @livewire('Popup-LiveManual')
+
 
         {{-- Admin Rule Setting --}}
         @include('jinytable::setActionRule')

@@ -4,6 +4,8 @@
  */
 namespace Jiny\Table\Http\Livewire;
 
+use Illuminate\Contracts\Container\Container;
+use Illuminate\Routing\Route;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -378,6 +380,27 @@ class WireTable extends Component
 
         } else {
             $this->popupPermitOpen();
+        }
+    }
+
+    public function call($method, ...$args)
+    {
+        if(isset($this->actions['controller'])) {
+            $controller = $this->actions['controller']::getInstance($this);
+            if(method_exists($controller, $method)) {
+                return $controller->$method($this, $args);
+            }
+        }
+    }
+
+
+    public function columnHidden($col_id)
+    {
+        $row = DB::table('table_columns')->where('id',$col_id)->first();
+        if($row->display) {
+            DB::table('table_columns')->where('id',$col_id)->update(['display'=>""]);
+        } else {
+            DB::table('table_columns')->where('id',$col_id)->update(['display'=>"true"]);
         }
     }
 

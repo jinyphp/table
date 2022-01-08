@@ -5,14 +5,22 @@ namespace Jiny\Table\Http\Livewire;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Storage;
+use Livewire\WithFileUploads;
 
 class WireForm extends Component
 {
+    use WithFileUploads;
+    use \Jiny\Table\Http\Livewire\Hook;
+    use \Jiny\Table\Http\Livewire\Permit;
+
     public $actions;
     public $table;
+    public $forms=[];
+    private $controller;
     public $back=true;
-    public $form=[];
-
 
     public function render()
     {
@@ -20,14 +28,14 @@ class WireForm extends Component
             // 수정
             $form = DB::table($this->actions['table'])->find($this->actions['id']);
             foreach ($form as $key => $value) {
-                $this->form[$key] = $value;
+                $this->forms[$key] = $value;
             }
 
             // 컨트롤러 메서드 호출
             if(isset($this->actions['controller'])) {
                 $controller = $this->actions['controller']::getInstance($this);
                 if(method_exists($controller, "hookEdited")) {
-                    $this->form = $controller->hookEdited($this->form);
+                    $this->forms = $controller->hookEdited($this->forms);
                 }
             }
 
@@ -63,27 +71,27 @@ class WireForm extends Component
     {
         //유효성 검사
         if (isset($this->actions['validate'])) {
-            $validator = Validator::make($this->form, $this->actions['validate'])->validate();
+            $validator = Validator::make($this->forms, $this->actions['validate'])->validate();
         }
 
-        $this->form['created_at'] = date("Y-m-d H:i:s");
-        $this->form['updated_at'] = date("Y-m-d H:i:s");
+        $this->forms['created_at'] = date("Y-m-d H:i:s");
+        $this->forms['updated_at'] = date("Y-m-d H:i:s");
 
         // 컨트롤러 메서드 호출
         if(isset($this->actions['controller'])) {
             $controller = $this->actions['controller']::getInstance($this);
             if(method_exists($controller, "hookStoring")) {
-                $form = $controller->hookStoring($this->form);
+                $form = $controller->hookStoring($this, $this->forms);
             } else {
-                $form = $this->form;
+                $form = $this->forms;
             }
         } else {
-            $form = $this->form;
+            $form = $this->forms;
         }
 
         $id = DB::table($this->actions['table'])->insertGetId($form);
 
-        $this->form = [];
+        $this->forms = [];
     }
 
 
@@ -91,7 +99,7 @@ class WireForm extends Component
     {
         //유효성 검사
         if (isset($this->actions['validate'])) {
-            $validator = Validator::make($this->form, $this->actions['validate'])->validate();
+            $validator = Validator::make($this->forms, $this->actions['validate'])->validate();
         }
 
         // 컨트롤러 메서드 호출
@@ -99,21 +107,21 @@ class WireForm extends Component
             $controller = $this->actions['controller']::getInstance($this);
             if(method_exists($controller, "hookUpdating")) {
                 //dd($controller);
-                $this->form = $controller->hookUpdating($this->form);
+                $this->forms = $controller->hookUpdating($this->forms);
             }
         }
 
         DB::table($this->actions['table'])
         ->where('id', $this->actions['id'])
-        ->update($this->form);
+        ->update($this->forms);
 
-        $this->form = [];
+        $this->forms = [];
     }
 
 
     public function clear()
     {
-        $this->form = [];
+        $this->forms = [];
     }
 
 

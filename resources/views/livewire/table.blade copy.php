@@ -1,4 +1,8 @@
+{{--
+    테이블 목록을 출력합니다.
+--}}
 <div>
+
     <x-loading-indicator/>
 
     {{-- 필터를 적용시 filter.blade.php 를 읽어 옵니다. --}}
@@ -10,24 +14,24 @@
         <div class="alert alert-success">{{session('message')}}</div>
     @endif
 
-    <div class="bg-white">
-        {{-- header --}}
-        <div class="p-2">
+    <!-- 데이터 목록 -->
+    <x-card>
+        <x-card-header>
             {{-- 페이징 --}}
             {!! xSelect()
                 ->addOptions(['5'=>"5",'10'=>"10",'20'=>"20",'50'=>"50",'100'=>"100"])
                 ->setWire('model',"paging")
                 ->setWidth("tiny")
             !!}
-        </div>
-        {{-- body --}}
-        <div class="p-2 overflow-x-auto">
+        </x-card-header>
+        <x-card-body>
             @if (isset($actions['view_list']))
                 @includeIf($actions['view_list'])
             @endif
-        </div>
-        {{-- footer --}}
-        <div class="p-2">
+
+        </x-card-body>
+
+        <x-card-footer>
             @if (isset($row) && is_object($row))
                 {{ $rows->links() }}
             @endif
@@ -45,8 +49,9 @@
                 선택삭제
             </x-button>
             @endif
-        </div>
-    </div>
+
+        </x-card-footer>
+    </x-card>
 
 
     {{-- 선택삭제 --}}

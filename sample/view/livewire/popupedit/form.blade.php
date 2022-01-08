@@ -12,7 +12,7 @@
                 <x-form-label>활성화</x-form-label>
                 <x-form-item>
                     {!! xCheckbox()
-                        ->setWire('model.defer',"form.enable")
+                        ->setWire('model.defer',"forms.enable")
                     !!}
                 </x-form-item>
             </x-form-hor>
@@ -21,7 +21,7 @@
                 <x-form-label>이름</x-form-label>
                 <x-form-item>
                     {!! xInputText()
-                        ->setWire('model.defer',"form.name")
+                        ->setWire('model.defer',"forms.name")
                         ->setWidth("standard")
                     !!}
                 </x-form-item>
@@ -31,7 +31,7 @@
                 <x-form-label>국가</x-form-label>
                 <x-form-item>
                     {!! xInputText()
-                        ->setWire('model.defer',"form.country")
+                        ->setWire('model.defer',"forms.country")
                         ->setWidth("standard")
                     !!}
                 </x-form-item>
@@ -42,7 +42,7 @@
                 <x-form-item>
                     {!! xSelect()
                         ->table('hr_employee','name')
-                        ->setWire('model.defer',"form.manager")
+                        ->setWire('model.defer',"forms.manager")
 
                         ->setWidth("medium")
                     !!}
@@ -65,7 +65,7 @@
                 <x-form-label>메모</x-form-label>
                 <x-form-item>
                     {!! xTextarea()
-                        ->setWire('model.defer',"form.description")
+                        ->setWire('model.defer',"forms.description")
                     !!}
                 </x-form-item>
             </x-form-hor>

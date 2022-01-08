@@ -21,7 +21,7 @@ class PopupForm extends Component
      * LivePopupForm with AlpineJS
      */
     public $actions;
-    public $form=[];
+    public $forms=[];
     public $mode;
     private $controller;
 
@@ -33,6 +33,8 @@ class PopupForm extends Component
 
     public function render()
     {
+
+
         return view("jinytable::livewire.popup.form");
     }
 
@@ -65,13 +67,19 @@ class PopupForm extends Component
 
     public function create($value=null)
     {
+        $this->forms = []; //초기화
+        //dd($this->forms['sort']);
+
         if($this->permit['create']) {
+            unset($this->actions['id']);
+
             // 컨트롤러 메서드 호출
             if ($controller = $this->isHook("hookCreating")) {
                 $controller->hookCreating($this, $value);
             }
 
-            unset($this->actions['id']);
+
+
             $this->popupFormOpen();
         } else {
             $this->popupPermitOpen();
@@ -82,38 +90,35 @@ class PopupForm extends Component
     {
         if($this->permit['create']) {
 
-            //유효성 검사
+            // 1.유효성 검사
             if (isset($this->actions['validate'])) {
-                $validator = Validator::make($this->form, $this->actions['validate'])->validate();
+                $validator = Validator::make($this->forms, $this->actions['validate'])->validate();
             }
 
-            // 시간정보 생성
-            $this->form['created_at'] = date("Y-m-d H:i:s");
-            $this->form['updated_at'] = date("Y-m-d H:i:s");
+            // 2. 시간정보 생성
+            $this->forms['created_at'] = date("Y-m-d H:i:s");
+            $this->forms['updated_at'] = date("Y-m-d H:i:s");
 
-            // step4. 파일 업로드 체크
-            //
+            // 3. 파일 업로드 체크
             $this->fileUpload();
 
-            // 컨트롤러 메서드 호출
+            // 4. 컨트롤러 메서드 호출
             if ($controller = $this->isHook("hookStoring")) {
-                $form = $controller->hookStoring($this->form);
+                $form = $controller->hookStoring($this, $this->forms);
             } else {
-                $form = $this->form;
+                $form = $this->forms;
             }
 
-
-            // 데이터 삽입
+            // 5. 데이터 삽입
             if($form) {
                 $id = DB::table($this->actions['table'])->insertGetId($form);
+                $this->forms['id'] = $id;
 
-                // 컨트롤러 메서드 호출
+                // 6. 컨트롤러 메서드 호출
                 if ($controller = $this->isHook("hookStored")) {
-                    $controller->hookStored($this->form, $id);
+                    $controller->hookStored($this, $this->forms);
                 }
             }
-
-
 
             // 입력데이터 초기화
             $this->cancel();
@@ -132,7 +137,7 @@ class PopupForm extends Component
     // 취소 및 form 입력항목 초기화
     public function cancel()
     {
-        $this->form = [];
+        $this->forms = [];
     }
 
 
@@ -151,7 +156,7 @@ class PopupForm extends Component
 
             // 컨트롤러 메서드 호출
             if ($controller = $this->isHook("hookEditing")) {
-                $this->form = $controller->hookEditing($this->form);
+                $this->forms = $controller->hookEditing($this, $this->forms);
             }
 
             if (isset($this->actions['id'])) {
@@ -161,7 +166,7 @@ class PopupForm extends Component
 
             // 컨트롤러 메서드 호출
             if ($controller = $this->isHook("hookEdited")) {
-                $this->form = $controller->hookEdited($this->form);
+                $this->forms = $controller->hookEdited($this, $this->forms);
             }
         } else {
 
@@ -172,7 +177,7 @@ class PopupForm extends Component
     private function setForm($row)
     {
         foreach ($row as $key => $value) {
-            $this->form[$key] = $value;
+            $this->forms[$key] = $value;
         }
     }
 
@@ -196,12 +201,12 @@ class PopupForm extends Component
 
             // step2. 유효성 검사
             if (isset($this->actions['validate'])) {
-                $validator = Validator::make($this->form, $this->actions['validate'])->validate();
+                $validator = Validator::make($this->forms, $this->actions['validate'])->validate();
             }
 
             // step3. 컨트롤러 메서드 호출
             if ($controller = $this->isHook("hookUpdating")) {
-                $this->form = $controller->hookUpdating($this->form);
+                $this->forms = $controller->hookUpdating($this->forms);
             }
 
 
@@ -211,7 +216,7 @@ class PopupForm extends Component
             $fields = DB::table('uploadfile')->where('table', $this->actions['table'])->get();
             foreach($fields as $item) {
                 $key = $item->field; // 업로드 필드명
-                if($origin->$key != $this->form[$key]) {
+                if($origin->$key != $this->forms[$key]) {
                     ## 이미지를 수정하는 경우, 기존 이미지는 삭제합니다.
                     Storage::delete($origin->$key);
                 }
@@ -219,15 +224,15 @@ class PopupForm extends Component
 
 
             // step5. 데이터 수정
-            if($this->form) {
+            if($this->forms) {
                 DB::table($this->actions['table'])
                     ->where('id', $this->actions['id'])
-                    ->update($this->form);
+                    ->update($this->forms);
             }
 
             // step6. 컨트롤러 메서드 호출
             if ($controller = $this->isHook("hookUpdated")) {
-                $this->form = $controller->hookUpdated($this->form);
+                $this->forms = $controller->hookUpdated($this->forms);
             }
 
             // 입력데이터 초기화
@@ -328,10 +333,10 @@ class PopupForm extends Component
             \mkdir($path, 755, true);
         }
 
-        foreach($this->form as $key => $item) {
+        foreach($this->forms as $key => $item) {
             if($item instanceof \Livewire\TemporaryUploadedFile) {
                 $filename = $item->store($upload_directory, $visible);
-                $this->form[$key] = $visible."/".$filename;
+                $this->forms[$key] = $visible."/".$filename;
 
                 // uploadfile 테이블에 기록
                 DB::table('uploadfile')->updateOrInsert([

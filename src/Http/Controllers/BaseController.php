@@ -38,7 +38,14 @@ class BaseController extends Controller
         foreach($slug as $key => $item) {
             if($item[0] == "{") unset($slug[$key]);
         }
-        $slugPath = implode("/",$slug);
+
+        // resource 컨트롤러에서 ~/create 는 삭제.
+        $last = count($slug)-1;
+        if($slug[$last] == "create") {
+            unset($slug[$last]);
+        }
+
+        $slugPath = implode("/",$slug); // 다시 url 연결.
 
         // Actions 정보를 설정함
         $this->actions['route']['uri'] = $slugPath;

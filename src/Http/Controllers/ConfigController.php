@@ -35,7 +35,7 @@ class ConfigController extends BaseController
         // 권한
         $this->permitCheck();
         if($this->permit['read']) {
-            $view = $this->checkMainView();
+            $view = $this->checkEditView();
             return view($view,[
                 'actions' => $this->actions,
                 'request' => $request
@@ -49,7 +49,7 @@ class ConfigController extends BaseController
         ]);
     }
 
-    private function checkMainView()
+    private function checkEditView()
     {
         // 메인뷰 페이지...
         if (isset($this->actions['view_main'])) {
@@ -58,7 +58,7 @@ class ConfigController extends BaseController
                 return $this->actions['view_main'];
             }
         }
-        return "jinytable::main";
+        return "jinytable::config";
     }
 
 

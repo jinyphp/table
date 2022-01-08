@@ -50,6 +50,8 @@ class JinyTableServiceProvider extends ServiceProvider
         /* 라이브와이어 컴포넌트 등록 */
         $this->app->afterResolving(BladeCompiler::class, function () {
             // AlpineJS 를 이용항 Table
+            Livewire::component('TableTitle', \Jiny\Table\Http\Livewire\TableTitle::class);
+
             Livewire::component('WireTable', \Jiny\Table\Http\Livewire\WireTable::class);
             Livewire::component('WireForm', \Jiny\Table\Http\Livewire\WireForm::class); // 페이지 이동
             Livewire::component('Popup-LiveForm', \Jiny\Table\Http\Livewire\PopupForm::class); // 팝업형
@@ -68,7 +70,7 @@ class JinyTableServiceProvider extends ServiceProvider
             Livewire::component('setActionRule', \Jiny\Table\Http\Livewire\SetActionRule::class);
 
 
-
+            Livewire::component('Test', \Jiny\Table\Http\Livewire\Test::class);
 
 
         });

@@ -68,33 +68,34 @@ public function hookCreating($wire, $value)
 ## 신규 데이터 DB 삽입전에 호출됩니다.
 
 ```php
-public function hookStoring($form)
+public function hookStoring($wire,$form)
 {
     return $form;
 }
 ```
 
 `hookStored` 는 DB에 새로운 데이터를 삽입이 성공되었을 때 동작하는
-후크메소드 입니다. 입력한 form 데이터와 삽입한 마지막 id값을 같이 전달 받습니다.
+후크메소드 입니다. 
+데이터를 입력후 id값은 `form['id]`값으로 확인할 수 있습니다.
  
 ```php
-    public function hookStored($form, $id)
+    public function hookStored($wire, $form)
     {
-
+        $id = $form['id'];
     }
 ```
 
 ## 수정폼이 실행될때 호출됩니다.
 
 ```php
-public function hookEditing($form, $old)
+public function hookEditing($wire, $form, $old)
 {
     return $form;
 }
 ```
 
 ```php
-public function hookEdited($form, $old)
+public function hookEdited($wire, $form, $old)
 {
     return $form;
 }

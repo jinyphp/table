@@ -7,6 +7,7 @@
         @endif
         <!-- end page title -->
 
+
         @livewire('WireForm', ['actions'=>$actions])
 
     </x-theme-layout>
