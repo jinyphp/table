@@ -33,6 +33,20 @@ class FormBuilder
     public function make($type=null)
     {
         $uri = "/".$this->actions['route']['uri'];
+
+        // 탭정보 읽기
+        $tabs = DB::table('form_tabs')
+            ->where('uri',$uri)
+            ->where('enable',1)
+            ->orderby('pos',"asc")->get();
+        $tabRows = [];
+        foreach($tabs as $tab) {
+            $id = $tab->id;
+            $tabRows[$id] = $tab;
+        }
+
+
+
         $_forms = DB::table('table_forms')
             ->where('uri',$uri)
             ->where('enable',1)
@@ -52,29 +66,51 @@ class FormBuilder
                     ->setWire('model.defer',"forms.".$item->field);
             }
 
-            $tab = $item->tab;
-            if($tab) {
+
+            $tabid = $item->tab;
+            $tabname = $tabRows[$tabid]->name;
+            if($tabname) {
 
             } else {
-                $tab = "basic";
+                $tabname = "basic";
             }
 
-            $formTabs[$tab] []= $this->xFormHorizontal($item->label,$obj);
+            $formTabs[$tabid] []= $this->xFormHorizontal($item->label,$obj);
         }
 
-        //return $formTabs;
+
 
         // 폼 텝출력
         $navTab = xNavTab($type);
-        foreach ($formTabs as $tabname => $tabs) {
+
+        foreach($tabRows as $item) {
+            $tabid = $item->id;
+
+            $content = xDiv();
+            if(isset($formTabs[$tabid])) {
+                foreach($formTabs[$tabid] as $form) {
+                    $content->addItem($form);
+                }
+            }
+
+            $navTab->setTab($item->name, $item->id)->setContent($content);
+        }
+
+
+        /*
+        foreach ($formTabs as $tabid => $tabs) {
 
             $content = xDiv();
             foreach ($tabs as $tab) {
                 $content->addItem($tab);
             }
 
-            $navTab->addTab($tabname)->setContent($content);
+            $tabname = $tabRows[$tabid]->name;
+            //$navTab->addTab($tabname)->setContent($content);
+            $navTab->setTab($tabname, $tabid)->setContent($content);
         }
+        */
+
 
         return $navTab;
     }

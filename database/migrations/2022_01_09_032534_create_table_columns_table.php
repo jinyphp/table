@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTableColumnTable extends Migration
+class CreateTableColumnsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -16,6 +16,7 @@ class CreateTableColumnTable extends Migration
         Schema::create('table_columns', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+
             $table->string('enable')->default(1);
 
             // 주소기반
@@ -45,9 +46,11 @@ class CreateTableColumnTable extends Migration
             $table->string('sort')->nullable();
 
             $table->string('description')->nullable();
+
             // 작업자ID
             $table->unsignedBigInteger('user_id')->default(0);
             $table->unsignedBigInteger('_id')->default(0);
+
         });
     }
 
