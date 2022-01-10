@@ -38,4 +38,5 @@ Route::middleware(['web','auth:sanctum', 'verified'])
 ->prefix('/api')->group(function () {
     Route::post('table/column/pos',[\Jiny\Table\API\Controllers\ColumnsPos::class,"index"]);
     Route::post('table/column/resize',[\Jiny\Table\API\Controllers\ColumnsResize::class,"index"]);
+    Route::post('table/forms/tabpos',[\Jiny\Table\API\Controllers\FormPos::class,"index"]);
 });

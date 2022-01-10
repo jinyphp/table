@@ -417,8 +417,16 @@ class WireForm extends Component
         $this->popupTabbarConfirm = false;
         $this->popupTabbarMessage = null;
     }
+    public function popupNewTab()
+    {
+        $this->tabid = null;
+        $this->tabname = null;
 
-    public function popupTabbar($id=null)
+        // 팝업창 열기
+        $this->popupTabbar = true;
+    }
+
+    public function popupTabEdit($id=null)
     {
         if($id) {
             $this->tabid = $id;
@@ -433,6 +441,7 @@ class WireForm extends Component
     {
         if($this->tabid) {
             DB::table('form_tabs')->where('id',$this->tabid)->update(['name'=>$this->tabname]);
+
         } else {
             $uri = "/".$this->actions['route']['uri'];
             $pos = DB::table('form_tabs')->where('uri',$uri)->max('pos'); //최대값 pos
