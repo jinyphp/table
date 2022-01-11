@@ -17,6 +17,7 @@ class PopupForm extends Component
     use \Jiny\Table\Http\Livewire\Hook;
     use \Jiny\Table\Http\Livewire\Permit;
     use \Jiny\Table\Http\Livewire\Upload;
+    use \Jiny\Table\Http\Livewire\Tabbar;
 
     /**
      * LivePopupForm with AlpineJS

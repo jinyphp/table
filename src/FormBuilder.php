@@ -66,6 +66,7 @@ class FormBuilder
         */
 
 
+        // 타이틀 라벨
         $formLabel = xDiv();
             $xLabel = new \Jiny\Html\CTag('label',true);
             $xLabel->addItem($label);
@@ -75,16 +76,28 @@ class FormBuilder
             $xLabel->addStyle("font-weight: normal;");
         $formLabel->addItem($xLabel);
         $formLabel->addStyle("width:150px");
-        $formLabel->addClass("pr-4 text-right");
+        $formLabel->addClass("pr-2 text-right");
         $rowDiv->addItem($formLabel);
 
 
+        // 필드입력
         $xCol = new \Jiny\Html\CTag('div',true);
         //$xCol->addClass("col-sm-10");
         $xCol->addItem($input);
-
-
         $rowDiv->addItem($xCol);
+
+
+        // 도움말 버튼
+        $helpIcon = xDiv();
+        $helpIcon->addHtml('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+      </svg>');
+        $helpIcon->addClass("px-2");
+        $rowDiv->addItem($helpIcon);
+
+
+
 
         $rowDiv->addClass("flex items-center"); //tailwind
 
