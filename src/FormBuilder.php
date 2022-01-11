@@ -13,8 +13,29 @@ class FormBuilder
         $this->actions = $actions;
     }
 
+    public $drag = false;
+    public function setDrag()
+    {
+        $this->drag = true;
+    }
+
+    public $type;
+    public function setType($type)
+    {
+        $this->type;
+    }
+
+    /*
     public function xFormHorizontal($label, $input) {
         $rowDiv = new \Jiny\Html\CTag('div',true);
+
+        $dragIcon = xSpan();
+        $dragIcon->addHtml('<svg class="inline-block" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grip-vertical" viewBox="0 0 16 16">
+        <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+        </svg>');
+        $rowDiv->addItem($dragIcon);
+
+
 
         $xLabel = new \Jiny\Html\CTag('label',true);
         $xLabel->addItem($label);
@@ -29,24 +50,67 @@ class FormBuilder
 
         return $rowDiv->addClass("row mb-3");
     }
+    */
 
+    public function xFormHorizontal($label, $input) {
+
+        $rowDiv = new \Jiny\Html\CTag('div',true);
+
+        /*
+        $dragIcon = xDiv();
+        $dragIcon->addHtml('<svg class="inline-block" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grip-vertical" viewBox="0 0 16 16">
+        <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+        </svg>');
+        //$dragIcon->addClass('-mt-8');
+        $rowDiv->addItem($dragIcon);
+        */
+
+
+        $formLabel = xDiv();
+            $xLabel = new \Jiny\Html\CTag('label',true);
+            $xLabel->addItem($label);
+            //$xLabel->addClass("col-sm-2");
+            //$xLabel->addClass("form-label");
+            $xLabel->addClass("m-0 font-light");
+            $xLabel->addStyle("font-weight: normal;");
+        $formLabel->addItem($xLabel);
+        $formLabel->addStyle("width:150px");
+        $formLabel->addClass("pr-4 text-right");
+        $rowDiv->addItem($formLabel);
+
+
+        $xCol = new \Jiny\Html\CTag('div',true);
+        //$xCol->addClass("col-sm-10");
+        $xCol->addItem($input);
+
+
+        $rowDiv->addItem($xCol);
+
+        $rowDiv->addClass("flex items-center"); //tailwind
+
+        return $rowDiv;
+    }
+
+    // 탭ID별 입력폼을 생성합니다.
     private function getForms($uri, $tabRows)
     {
-        // 폼목록 읽기
+        // 활성화된 폼 목록 확인하기
         $_forms = DB::table('table_forms')
             ->where('uri',$uri)
             ->where('enable',1)
             ->orderby('pos',"asc")->get();
 
-        $formTabs = [];
 
+        $formTabs = [];
         foreach ($_forms as $item) {
+            // 폼타입을 확인합니다.
             if($item->input == "text") {
                 $inputType = "xInputText";
             } else if($item->input == "checkbox") {
                 $inputType = "xCheckbox";
             }
 
+            // 폼을 생성합니다.
             if($inputType) {
                 $obj = $inputType()
                     ->setWire('model.defer',"forms.".$item->field);
@@ -54,14 +118,19 @@ class FormBuilder
 
 
             $tabid = $item->tab;
-            $tabname = $tabRows[$tabid]->name;
-            if($tabname) {
+            $formRow = $this->xFormHorizontal($item->label,$obj);
 
-            } else {
-                $tabname = "basic";
-            }
+            $li = (new CTag('li',true));
+            $li->addClass("mb-2");
+            //$li->style("list-style-type : none");
+            $li->addClass('dragForms');
+            $li->setAttribute("data-index",$item->id);
+            $li->setAttribute("draggable","true");
+            $li->addItem($formRow);
 
-            $formTabs[$tabid] []= $this->xFormHorizontal($item->label,$obj);
+            $formTabs[$tabid] []= $li;
+
+
         }
 
         return $formTabs;
@@ -83,6 +152,60 @@ class FormBuilder
 
         return $tabRows;
     }
+
+
+    public function make($type=null)
+    {
+        $uri = "/".$this->actions['route']['uri'];
+        $tabRows = $this->getTabs($uri);
+        $formTabs = $this->getForms($uri, $tabRows);
+
+
+        // 폼 텝출력
+        $navTab = xNavTab();
+        foreach($tabRows as $item) {
+            $tabid = $item->id;
+
+            $content = (new CTag('ul',true));
+            $content->addClass("from-group");
+            $content->addClass("list-none");
+            $content->addClass("p-0");
+            $content->setAttribute('data-tab-index',$item->id);
+            if(isset($formTabs[$tabid])) {
+                // 탭요소 추가
+                foreach($formTabs[$tabid] as $form) {
+                    $form->setAttribute('data-tab-index', $tabid);
+                    $content->addItem($form);
+                }
+            }
+
+            // 텝그룹 이동셀 zone
+            $li = (new CTag('li',true));
+            $li->addClass("mb-2");
+            $li->addClass('dragForms');
+            $li->setAttribute("data-index",999);
+            $li->setAttribute("draggable","true");
+            $li->addItem("여기에 드롭하면 ".$item->name." 텝으로 이동됩니다.");
+            $li->addClass("hidden p-8 text-center bg-gray-100 tab-move-zone");
+            $content->addItem($li);
+
+
+
+            $navTab->setTab([
+                'label'=>$item->name,
+                $this->btnSetting($tabid)
+            ], $content, $drag=$tabid);
+        }
+
+        // 동적 추가
+        $navTab->setTab(['label'=>$this->btnAddPlus()], "새로운 탭을 추가합니다.");
+
+        return $navTab;
+    }
+
+    /** ----- ----- ----- ----- -----
+     *
+     */
 
     public function btnSetting($id)
     {
@@ -116,36 +239,5 @@ class FormBuilder
                     ->setAttribute('href',"javascript: void(0);");
         $link->setAttribute('wire:click', "popupNewTab");
         return $link;
-    }
-
-    public function make($type=null)
-    {
-        $uri = "/".$this->actions['route']['uri'];
-        $tabRows = $this->getTabs($uri);
-        $formTabs = $this->getForms($uri, $tabRows);
-
-
-        // 폼 텝출력
-        $navTab = xNavTab();
-        foreach($tabRows as $item) {
-            $tabid = $item->id;
-
-            $content = xDiv();
-            if(isset($formTabs[$tabid])) {
-                foreach($formTabs[$tabid] as $form) {
-                    $content->addItem($form);
-                }
-            }
-
-            $navTab->setTab([
-                'label'=>$item->name,
-                $this->btnSetting($tabid)
-            ], $content, $drag=$tabid);
-        }
-
-        // 동적 추가
-        $navTab->setTab(['label'=>$this->btnAddPlus()], "새로운 탭을 추가합니다.");
-
-        return $navTab;
     }
 }

@@ -13,21 +13,14 @@ use Illuminate\Support\Facades\Schema;
 use \Jiny\Html\CTag;
 
 
-class FormPos extends Controller
+class TabPos extends Controller
 {
     public function index()
     {
-        $i=0;
-        foreach($_POST['pos'] as $id => $tab) {
-            $i++;
-            if($id == 999) {
-                continue;
-            } else {
-                // 순서이동, 탭 변경
-                DB::table('table_forms')
-                    ->where('id', $id)
-                    ->update(['pos'=>$i, 'tab'=>$tab]);
-            }
+
+        foreach($_POST['pos'] as $id => $pos) {
+            DB::table('form_tabs')->where('id', $id)->update(['pos'=>$pos]);
+
         }
 
         return response()->json([
