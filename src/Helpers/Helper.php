@@ -111,3 +111,12 @@ function xCellAvatar($item, $key)
         // <x-avata class="w-8 h-8" src="/images/{{$item->image1}}"/>
     }
 }
+
+
+/** ----- ----- ----- ----- -----
+ *  테이블 Columns 출력셀
+ */
+
+function xColumnLink($title, $href) {
+
+}

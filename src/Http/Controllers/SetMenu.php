@@ -17,5 +17,8 @@ trait SetMenu
                 xMenu()->setPath($this->MENU_PATH . DIRECTORY_SEPARATOR . $menuid . ".json");
             }
         }
+
+
+
     }
 }

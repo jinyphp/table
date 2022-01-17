@@ -28,9 +28,11 @@
         </div>
         {{-- footer --}}
         <div class="p-2">
-            @if (isset($row) && is_object($row))
+            @if (isset($rows) && is_object($rows))
                 {{ $rows->links() }}
             @endif
+
+
 
             {{-- 선택갯수 표시--}}
             <span id="selected-num">{{count($selected)}}</span>

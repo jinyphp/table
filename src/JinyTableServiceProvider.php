@@ -43,6 +43,9 @@ class JinyTableServiceProvider extends ServiceProvider
         Blade::component($this->package.'::components.'.'liveform', 'live-form');
         Blade::component($this->package.'::components.'.'livesubmit', 'live-submit');
 
+        // form 버튼
+        Blade::component($this->package.'::components.'.'PopupFormCreate', 'popup-form-create');
+
     }
 
     public function register()
@@ -71,6 +74,9 @@ class JinyTableServiceProvider extends ServiceProvider
 
 
             Livewire::component('Test', \Jiny\Table\Http\Livewire\Test::class);
+
+            // ui Design
+            Livewire::component('DesignForm', \Jiny\Table\Http\Livewire\DesignForm::class);
 
 
         });

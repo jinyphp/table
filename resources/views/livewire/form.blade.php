@@ -17,6 +17,7 @@
                     {{-- 삭제는 확인컨펌을 통하여 삭제처리 --}}
                     @if($confirm)
                         <x-button danger wire:click="delete">삭제</x-button>
+                        <span>정말로 삭제할까요?</span>
                     @else
                         <x-button secondary wire:click="deleteConfirm">삭제</x-button>
                     @endif

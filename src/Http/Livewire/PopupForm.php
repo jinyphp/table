@@ -35,15 +35,13 @@ class PopupForm extends Component
 
     public function render()
     {
-
-
+        ## 팝업 레이아웃
         return view("jinytable::livewire.popup.form");
     }
 
     /** ----- ----- ----- ----- -----
      *  팝업창 관리
      */
-
     protected $listeners = ['popupFormOpen','popupFormClose','popupFormCreate','edit'];
     public $popupForm = false;
     public function popupFormOpen()
@@ -59,6 +57,10 @@ class PopupForm extends Component
 
     public function popupFormCreate($value=null)
     {
+        // 신규 삽입을 위한 데이터 초기화
+        $this->formInitField();
+
+        // create 메소드를 호출합니다.
         return $this->create($value);
     }
 
@@ -66,24 +68,28 @@ class PopupForm extends Component
     /** ----- ----- ----- ----- -----
      *  신규 데이터 삽입
      */
+    private function formInitField()
+    {
+        $this->forms = [];
+        return $this;
+    }
 
     public function create($value=null)
     {
-        $this->forms = []; //초기화
-        //dd($this->forms['sort']);
-
+        // 삽입 권한이 있는지 확인
         if($this->permit['create']) {
             unset($this->actions['id']);
 
-            // 컨트롤러 메서드 호출
+            // 후킹:: 컨트롤러 메서드 호출
             if ($controller = $this->isHook("hookCreating")) {
                 $controller->hookCreating($this, $value);
             }
 
-
-
+            // 폼입력 팝업창 활성화
             $this->popupFormOpen();
+
         } else {
+            // 권한 없음 팝업을 활성화 합니다.
             $this->popupPermitOpen();
         }
     }

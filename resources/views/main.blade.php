@@ -43,5 +43,10 @@
         {{-- Admin Rule Setting --}}
         @include('jinytable::setActionRule')
 
+
+        {{-- popup UI Design mode --}}
+        <!-- ui design form -->
+        @livewire('DesignForm')
+
     </x-theme-layout>
 </x-theme>

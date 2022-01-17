@@ -35,17 +35,23 @@ class BaseController extends Controller
 
         // uri에서 {} 매개변수 제거
         $slug = explode('/', $uri);
+        $_slug = [];
         foreach($slug as $key => $item) {
-            if($item[0] == "{") unset($slug[$key]);
+            if($item[0] == "{") {
+                $this->actions['nesteds'] []= substr($item, 1, strlen($item)-2);
+                continue; //unset($slug[$key])
+            }
+            $_slug []= $item;
         }
 
         // resource 컨트롤러에서 ~/create 는 삭제.
-        $last = count($slug)-1;
-        if($slug[$last] == "create") {
-            unset($slug[$last]);
+        $last = count($_slug)-1;
+        //dd($_slug);
+        if($_slug[$last] == "create") {
+            unset($_slug[$last]);
         }
 
-        $slugPath = implode("/",$slug); // 다시 url 연결.
+        $slugPath = implode("/",$_slug); // 다시 url 연결.
 
         // Actions 정보를 설정함
         $this->actions['route']['uri'] = $slugPath;

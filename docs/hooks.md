@@ -58,6 +58,8 @@ public function hookIndexed($wire, $rows)
 ```
 
 ## 생성폼이 실행될때 호출됩니다.
+`hookCreating` 은 생성폼이 생성될때 호출되는 후크 입니다.
+생성폼을 만들때 특정값를 미리 설정해야 하는 동작이 필요할때 유용합니다.
 ```php
 public function hookCreating($wire, $value)
 {
@@ -66,6 +68,7 @@ public function hookCreating($wire, $value)
 ```
 
 ## 신규 데이터 DB 삽입전에 호출됩니다.
+새로운 데이터를 삽입하기 전에 호출됩니다.
 
 ```php
 public function hookStoring($wire,$form)

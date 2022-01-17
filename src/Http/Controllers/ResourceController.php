@@ -18,12 +18,28 @@ class ResourceController extends BaseController
     use \Jiny\Table\Http\Livewire\Permit;
     use \Jiny\Table\Http\Controllers\SetMenu;
 
+    private function checkRequestNesteds($request)
+    {
+        if (isset($this->actions['nesteds'])) {
+            foreach($this->actions['nesteds'] as $i => $nested) {
+                if(isset($request->$nested)) {
+                    //dd($this->actions['nesteds'][$i]);
+                    unset($this->actions['nesteds'][$i]);
+                    $this->actions['nesteds'][$nested] = $request->$nested;
+                }
+            }
+        }
+
+        return $this;
+    }
 
     /**
      * CRUD Resource Process
      */
     public function index(Request $request)
     {
+        $this->checkRequestNesteds($request);
+
         // 메뉴 설정
         $user = Auth::user();
         $this->setUserMenu($user);
@@ -44,6 +60,8 @@ class ResourceController extends BaseController
                 $view = "jinytable::main";
             }
 
+
+
             return view($view,[
                 'actions'=>$this->actions,
                 'request'=>$request
@@ -59,6 +77,8 @@ class ResourceController extends BaseController
 
     public function show(Request $request, $id)
     {
+        $this->checkRequestNesteds($request);
+
         // 메뉴 설정
         $user = Auth::user();
         $this->setUserMenu($user);
@@ -78,6 +98,11 @@ class ResourceController extends BaseController
 
     public function create(Request $request)
     {
+
+        $this->checkRequestNesteds($request);
+
+
+
         // 메뉴 설정
         $user = Auth::user();
         $this->setUserMenu($user);
@@ -107,6 +132,8 @@ class ResourceController extends BaseController
 
     public function store(Request $request)
     {
+        $this->checkRequestNesteds($request);
+
         // 권한
         $this->permitCheck();
         if($this->permit['create']) {
@@ -125,6 +152,8 @@ class ResourceController extends BaseController
 
     public function edit(Request $request, $id)
     {
+        $this->checkRequestNesteds($request);
+
         // 메뉴 설정
         $user = Auth::user();
         $this->setUserMenu($user);
@@ -132,8 +161,9 @@ class ResourceController extends BaseController
         // 권한
         $this->permitCheck();
         if($this->permit['update']) {
+            $keyId = array_key_last($this->actions['nesteds']);
+            $this->actions['id'] = $this->actions['nesteds'][$keyId];
 
-            $this->actions['id'] = $id;
             return view("jinytable::edit",['actions'=>$this->actions]);
         }
 
@@ -146,6 +176,8 @@ class ResourceController extends BaseController
 
     public function update(Request $request, $id)
     {
+        $this->checkRequestNesteds($request);
+
         // 권한
         $this->permitCheck();
         if($this->permit['update']) {
@@ -162,10 +194,17 @@ class ResourceController extends BaseController
 
     public function destroy($id, Request $request)
     {
+        $this->checkRequestNesteds($request);
+
+
+
         // 권한
         $this->permitCheck();
         if($this->permit['delete']) {
+            $keyId = array_key_last($this->actions['nesteds']);
+            $this->actions['id'] = $this->actions['nesteds'][$keyId];
 
+            //dd($this->actions['nesteds']);
 
         }
 
@@ -184,6 +223,8 @@ class ResourceController extends BaseController
      */
     public function delete(Request $request)
     {
+        $this->checkRequestNesteds($request);
+
         // 권한
         $this->permitCheck();
         if($this->permit['delete']) {
