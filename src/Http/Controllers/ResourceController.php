@@ -23,9 +23,9 @@ class ResourceController extends BaseController
         if (isset($this->actions['nesteds'])) {
             foreach($this->actions['nesteds'] as $i => $nested) {
                 if(isset($request->$nested)) {
-                    //dd($this->actions['nesteds'][$i]);
                     unset($this->actions['nesteds'][$i]);
                     $this->actions['nesteds'][$nested] = $request->$nested;
+                    $this->actions['request']['nesteds'][$nested] = $request->$nested;
                 }
             }
         }
@@ -33,12 +33,25 @@ class ResourceController extends BaseController
         return $this;
     }
 
+    // Request에서 전달된 query 스트링값을 저장합니다.
+    private function checkRequestQuery($request)
+    {
+        if($request->query) {
+            foreach($request->query as $key => $q) {
+                $this->actions['request']['query'][$key] = $q;
+            }
+        }
+        return $this;
+    }
+
+
     /**
      * CRUD Resource Process
      */
     public function index(Request $request)
     {
         $this->checkRequestNesteds($request);
+        $this->checkRequestQuery($request);
 
         // 메뉴 설정
         $user = Auth::user();
@@ -78,6 +91,7 @@ class ResourceController extends BaseController
     public function show(Request $request, $id)
     {
         $this->checkRequestNesteds($request);
+        $this->checkRequestQuery($request);
 
         // 메뉴 설정
         $user = Auth::user();
@@ -98,10 +112,8 @@ class ResourceController extends BaseController
 
     public function create(Request $request)
     {
-
         $this->checkRequestNesteds($request);
-
-
+        $this->checkRequestQuery($request);
 
         // 메뉴 설정
         $user = Auth::user();
@@ -133,6 +145,7 @@ class ResourceController extends BaseController
     public function store(Request $request)
     {
         $this->checkRequestNesteds($request);
+        $this->checkRequestQuery($request);
 
         // 권한
         $this->permitCheck();
@@ -140,7 +153,6 @@ class ResourceController extends BaseController
 
 
         }
-
 
         // 권한 접속 실패
         return view("jinytable::error.permit",[
@@ -153,6 +165,7 @@ class ResourceController extends BaseController
     public function edit(Request $request, $id)
     {
         $this->checkRequestNesteds($request);
+        $this->checkRequestQuery($request);
 
         // 메뉴 설정
         $user = Auth::user();
@@ -161,6 +174,7 @@ class ResourceController extends BaseController
         // 권한
         $this->permitCheck();
         if($this->permit['update']) {
+            // 마지막 값이, id로 간주합니다.
             $keyId = array_key_last($this->actions['nesteds']);
             $this->actions['id'] = $this->actions['nesteds'][$keyId];
 
@@ -177,6 +191,7 @@ class ResourceController extends BaseController
     public function update(Request $request, $id)
     {
         $this->checkRequestNesteds($request);
+        $this->checkRequestQuery($request);
 
         // 권한
         $this->permitCheck();
@@ -195,17 +210,14 @@ class ResourceController extends BaseController
     public function destroy($id, Request $request)
     {
         $this->checkRequestNesteds($request);
-
-
+        $this->checkRequestQuery($request);
 
         // 권한
         $this->permitCheck();
         if($this->permit['delete']) {
+            // 마지막 값이, id로 간주합니다.
             $keyId = array_key_last($this->actions['nesteds']);
             $this->actions['id'] = $this->actions['nesteds'][$keyId];
-
-            //dd($this->actions['nesteds']);
-
         }
 
         // 권한 접속 실패
@@ -224,6 +236,7 @@ class ResourceController extends BaseController
     public function delete(Request $request)
     {
         $this->checkRequestNesteds($request);
+        $this->checkRequestQuery($request);
 
         // 권한
         $this->permitCheck();

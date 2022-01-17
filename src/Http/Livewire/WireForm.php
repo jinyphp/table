@@ -19,19 +19,33 @@ class WireForm extends Component
     use \Jiny\Table\Http\Livewire\Upload;
     use \Jiny\Table\Http\Livewire\Tabbar;
 
+    use \Jiny\Table\Http\Livewire\Trait\Request;
+
     public $actions;
     public $table;
     public $forms=[];
     private $controller;
 
-
+    public $http_referer;
+    public $status;
     public function mount()
     {
         $this->permitCheck();
+        if(isset($_SERVER['HTTP_REFERER'])) {
+            $this->http_referer = $_SERVER['HTTP_REFERER'];
+        }
     }
 
     public function render()
     {
+        if($this->status) {
+            return <<<'blade'
+            <div class="alert alert-success">
+                processing...
+            </div>
+        blade;
+        }
+
         if (isset($this->actions['id'])) {
             // 수정
             $id = $this->actions['id'];
@@ -43,6 +57,9 @@ class WireForm extends Component
 
         return view("jinytable::livewire.form");
     }
+
+
+
 
 
     /** ----- ----- ----- ----- -----
@@ -72,8 +89,10 @@ class WireForm extends Component
     {
         if (isset($this->actions['id'])) {
             $this->update();
+            $this->status = "update";
         } else {
             $this->store();
+            $this->status = "store";
         }
 
         $this->goToIndex();
@@ -300,19 +319,9 @@ class WireForm extends Component
     public $back=true;
     private function goToIndex()
     {
-        // $_SERVER['HTTP_REFERER'] : 이전페이지 주소값
-        /*
-        if ($this->back) {
-            return redirect()->route($this->actions['routename'].'.index');
+        if($this->http_referer) {
+            return redirect()->to($this->http_referer);
         }
-
-        */
-
-        return redirect()->back();
-
     }
-
-
-
 
 }
