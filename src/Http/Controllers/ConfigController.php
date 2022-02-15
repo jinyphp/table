@@ -1,6 +1,6 @@
 <?php
 /**
- *
+ * 설정값을 php array 파일로 저장합니다.
  */
 namespace Jiny\Table\Http\Controllers;
 
@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\Route;
 use Jiny\Table\Http\Controllers\BaseController;
 class ConfigController extends BaseController
 {
-    use \Jiny\Table\Http\Livewire\Permit;
-    use \Jiny\Table\Http\Controllers\SetMenu;
+    use \Jiny\Table\Http\Livewire\Permit;       // 권환
+    use \Jiny\Table\Http\Controllers\SetMenu;   // 메뉴
 
     public function __construct()
     {
@@ -58,6 +58,8 @@ class ConfigController extends BaseController
                 return $this->actions['view_main'];
             }
         }
+
+        // config 수정
         return "jinytable::config";
     }
 

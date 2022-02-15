@@ -33,6 +33,8 @@ class BaseController extends Controller
         // 라우터에서 uri 정보 확인
         $uri = Route::current()->uri;
 
+        //dump($uri);
+
         // uri에서 {} 매개변수 제거
         $slug = explode('/', $uri);
         $_slug = [];

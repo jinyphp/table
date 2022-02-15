@@ -27,6 +27,12 @@ class WireConfig extends Component
         $this->configLoading();
     }
 
+    private function filename($filename)
+    {
+        $path = config_path().DIRECTORY_SEPARATOR.$this->filename.".php";
+        return $path;
+    }
+
     private function configLoading()
     {
         if(isset($this->actions['filename'])) {
@@ -34,9 +40,10 @@ class WireConfig extends Component
         }
 
         if ($this->filename) {
-            $path = config_path().DIRECTORY_SEPARATOR.$this->filename.".php";
+            $path = $this->filename($this->filename);
+            //$path = config_path().DIRECTORY_SEPARATOR.$this->filename.".php";
             if (file_exists($path)) {
-                $this->forms = config($this->filename);
+                $this->forms = config( str_replace('/','.',$this->filename) );
             }
         }
     }
@@ -90,7 +97,8 @@ class WireConfig extends Component
             // 설정값을 파일로 저장
             if ($this->filename) {
                 $file = $this->convToPHP($form);
-                $path = config_path().DIRECTORY_SEPARATOR.$this->filename.".php";
+                $path = $this->filename($this->filename);
+                //$path = config_path().DIRECTORY_SEPARATOR.$this->filename.".php";
                 file_put_contents($path, $file);
             }
 
