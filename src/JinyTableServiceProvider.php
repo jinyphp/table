@@ -46,6 +46,11 @@ class JinyTableServiceProvider extends ServiceProvider
         // form 버튼
         Blade::component($this->package.'::components.'.'PopupFormCreate', 'popup-form-create');
 
+
+        // javascript emit 버튼
+        Blade::component($this->package.'::components.'.'wire.create', 'btn-emitCreate');
+        Blade::component($this->package.'::components.'.'wire.manual', 'btn-emitManual');
+
     }
 
     public function register()
@@ -53,12 +58,23 @@ class JinyTableServiceProvider extends ServiceProvider
         /* 라이브와이어 컴포넌트 등록 */
         $this->app->afterResolving(BladeCompiler::class, function () {
             // AlpineJS 를 이용항 Table
-            Livewire::component('TableTitle', \Jiny\Table\Http\Livewire\TableTitle::class);
+            //# 모듈이동 Livewire::component('TableTitle', \Jiny\Table\Http\Livewire\TableTitle::class);
+
 
             Livewire::component('WireTable', \Jiny\Table\Http\Livewire\WireTable::class);
+            Livewire::component('AdminTable', \Jiny\Table\Http\Livewire\AdminTable::class);
+            Livewire::component('LivewireTable', \Jiny\Table\Http\Livewire\LivewireTable::class);
+
+
+
+
             Livewire::component('WireForm', \Jiny\Table\Http\Livewire\WireForm::class); // 페이지 이동
             Livewire::component('Popup-LiveForm', \Jiny\Table\Http\Livewire\PopupForm::class); // 팝업형
+            Livewire::component('LivewireFormPopup', \Jiny\Table\Http\Livewire\LivewireFormPopup::class); // 팝업형
+
             Livewire::component('Popup-LiveManual', \Jiny\Table\Http\Livewire\PopupManual::class);
+
+
 
             Livewire::component('JsonTable', \Jiny\Table\Http\Livewire\JsonTable::class);
 
@@ -70,7 +86,7 @@ class JinyTableServiceProvider extends ServiceProvider
             // Form => json 저장
             Livewire::component('WireConfig', \Jiny\Table\Http\Livewire\WireConfig::class);
 
-            Livewire::component('setActionRule', \Jiny\Table\Http\Livewire\SetActionRule::class);
+
 
 
             Livewire::component('Test', \Jiny\Table\Http\Livewire\Test::class);

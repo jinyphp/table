@@ -1,7 +1,12 @@
-{{-- 설정 파일을 생성할 수 있는 출력 템플릿 --}}
-<x-theme theme="admin.sidebar2">
+<x-theme>
+    {{-- 설정 파일을 생성할 수 있는 출력 템플릿 --}}
     <x-theme-layout>
-
+        <!-- Module Title Bar -->
+        @if(Module::has('Titlebar'))
+            @livewire('TitleBar', ['actions'=>$actions])
+        @endif
+        <!-- end -->
+        {{--
         <!-- start page title -->
         @if (isset($actions['view_title']) && !empty($actions['view_title']))
             @includeIf($actions['view_title'])
@@ -9,6 +14,7 @@
             @include("jinytable::title")
         @endif
         <!-- end page title -->
+        --}}
 
         @livewire('WireConfig', ['actions'=>$actions])
 

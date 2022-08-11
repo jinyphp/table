@@ -28,6 +28,16 @@ class WireForm extends Component
 
     public $http_referer;
     public $status;
+
+    public $message;
+    public $error = false;
+
+    public function closeError()
+    {
+        $this->error = false;
+        $this->message = null;
+    }
+
     public function mount()
     {
         $this->permitCheck();
@@ -38,24 +48,21 @@ class WireForm extends Component
 
     public function render()
     {
-        if($this->status) {
-            return <<<'blade'
-            <div class="alert alert-success">
-                processing...
-            </div>
-        blade;
-        }
-
+        // 생성 및 수정동작 지정
         if (isset($this->actions['id'])) {
-            // 수정
-            $id = $this->actions['id'];
-            $this->edit($id);
+            $this->edit($this->actions['id']);
         } else {
-            // 생성
             $this->create();
         }
 
-        return view("jinytable::livewire.form");
+        // 사용자 레이아웃 지정
+        if(isset($this->actions['view_main_layout'])) {
+            $viewFile = $this->actions['view_main_layout'];
+        } else {
+            $viewFile = "jinytable::livewire.form";
+        }
+
+        return view($viewFile);
     }
 
 
@@ -68,20 +75,89 @@ class WireForm extends Component
 
     public function create($value=null)
     {
-        $this->forms = []; //초기화
-
+        // 삽입 권한이 있는지 확인
         if($this->permit['create']) {
             unset($this->actions['id']);
 
-            // 컨트롤러 메서드 호출
+            // 후킹:: 컨트롤러 메서드 호출
             if ($controller = $this->isHook("hookCreating")) {
-                $controller->hookCreating($this, $value);
+                $form = $controller->hookCreating($this, $value);
+                if($form && is_array($form)) {
+                    $this->forms = $form;
+                } else if($form === false) {
+                    // 오류처리 팝업창
+                    $this->error = true;
+                    return false;
+                }
             }
+
+        } else {
+            // 권한 없음 팝업을 활성화 합니다.
+            $this->popupPermitOpen();
+        }
+    }
+
+
+    public function clear()
+    {
+        $this->forms = [];
+    }
+
+    public function store()
+    {
+        $this->message = null;
+
+        if($this->permit['create']) {
+
+            // 1.유효성 검사
+            if (isset($this->actions['validate'])) {
+                $validator = Validator::make($this->forms, $this->actions['validate'])->validate();
+            }
+
+            // 2. 시간정보 생성
+            $this->forms['created_at'] = date("Y-m-d H:i:s");
+            $this->forms['updated_at'] = date("Y-m-d H:i:s");
+
+            // 3. 파일 업로드 체크
+            $this->fileUpload();
+
+            // 4. 컨트롤러 메서드 호출
+            if ($controller = $this->isHook("hookStoring")) {
+                $form = $controller->hookStoring($this, $this->forms);
+                if($form === false) {
+                    // 오류처리 팝업창
+                    $this->error = true;
+                    return false;
+                }
+            } else {
+                $form = $this->forms;
+            }
+
+            // 5. 데이터 삽입
+            if($form) {
+                $id = DB::table($this->actions['table'])->insertGetId($form);
+                $form['id'] = $id;
+
+                // 6. 컨트롤러 메서드 호출
+                if ($controller = $this->isHook("hookStored")) {
+                    $result = $controller->hookStored($this, $form);
+                    if($result === false) {
+                        // 오류처리 팝업창
+                        $this->error = true;
+                        return false;
+                    }
+                }
+            }
+
+            // 입력데이터 초기화
+            $this->clear();
 
         } else {
             $this->popupPermitOpen();
         }
     }
+
+
 
 
 
@@ -98,11 +174,8 @@ class WireForm extends Component
         $this->goToIndex();
     }
 
-    public function clear()
-    {
-        $this->forms = [];
-    }
 
+    /*
     public function store()
     {
         if($this->permit['create']) {
@@ -145,6 +218,7 @@ class WireForm extends Component
         }
 
     }
+    */
 
     /** ----- ----- ----- ----- -----
      *  데이터 수정
@@ -155,31 +229,25 @@ class WireForm extends Component
         if($this->permit['update']) {
 
             if($id) {
+                $this->edit_id = $id;
                 $this->actions['id'] = $id;
             }
 
-            // 컨트롤러 메서드 호출
+            // 후크: 데이터 조회전 동작
             if ($controller = $this->isHook("hookEditing")) {
                 $this->forms = $controller->hookEditing($this, $this->forms);
             }
 
+            // 데이터를 읽어 form필드를
             if (isset($this->actions['id'])) {
                 $row = DB::table($this->actions['table'])->find($this->actions['id']);
-                if($row) {
-                    $this->setForm($row);
-                } else {
-                    return false;
-                    //dd("데이터를 읽을 수 없습니다. 삭제되었나요?");
-                    //return "데이터를 읽을 수 없습니다. 삭제되었나요?";
-                }
-
-                // 컨트롤러 메서드 호출
-                if ($controller = $this->isHook("hookEdited")) {
-                    $this->forms = $controller->hookEdited($this, $this->forms);
-                }
-
+                $this->setForm($row);
             }
-            return true;
+
+            // 후크: 데이터 조회후 동작
+            if ($controller = $this->isHook("hookEdited")) {
+                $this->forms = $controller->hookEdited($this, $this->forms);
+            }
 
         } else {
             $this->popupPermitOpen();
@@ -194,6 +262,9 @@ class WireForm extends Component
         }
     }
 
+
+
+
     public $old=[];
     public function getOld($key=null)
     {
@@ -205,58 +276,83 @@ class WireForm extends Component
 
     public function update()
     {
+        if($this->permitUpdate()) {
+            // 데이터 수정 진행
+            $this->updateProcess();
 
-        if($this->permit['update']) {
-            // step1. 수정전, 원본 데이터 읽기
+        } else {
+            // 권한없음 팝업창 출력
+            $this->popupPermitOpen();
+        }
+    }
+
+    private function updateProcess()
+    {
+        // step1. 수정전, 원본 데이터 읽기
+        if (isset($this->actions['id'])) {
             $origin = DB::table($this->actions['table'])->find($this->actions['id']);
-
             foreach ($origin as $key => $value) {
                 $this->old[$key] = $value;
             }
+        }
 
-            // step2. 유효성 검사
-            if (isset($this->actions['validate'])) {
-                $validator = Validator::make($this->forms, $this->actions['validate'])->validate();
+        // step2. 유효성 검사
+        if (isset($this->actions['validate'])) {
+            $validator = Validator::make($this->forms, $this->actions['validate'])->validate();
+        }
+
+        // step3. 컨트롤러 메서드 호출
+        if ($controller = $this->isHook("hookUpdating")) {
+            $form = $controller->hookUpdating($this, $this->forms, $this->old);
+            if($form && is_array($form)) {
+                $this->forms = $form;
+            } else if($form === false) {
+                // 오류처리 팝업창
+                $this->error = true;
+                return false;
             }
+        }
 
-            // step3. 컨트롤러 메서드 호출
-            if ($controller = $this->isHook("hookUpdating")) {
-                $this->forms = $controller->hookUpdating($this->forms);
-            }
+        // step4. 파일 업로드 체크
+        $this->fileUpload();
+        if(isset($origin)) {
+            $this->checkEditUploadFile($origin);
+        }
 
-            // step4. 파일 업로드 체크
-            $this->fileUpload();
-            // uploadfile 필드 조회
-            $fields = DB::table('uploadfile')->where('table', $this->actions['table'])->get();
-            foreach($fields as $item) {
-                $key = $item->field; // 업로드 필드명
-                if($origin->$key != $this->forms[$key]) {
-                    ## 이미지를 수정하는 경우, 기존 이미지는 삭제합니다.
-                    Storage::delete($origin->$key);
-                }
-            }
 
-            // step5. 데이터 수정
-            if($this->forms) {
+
+        // step5. 데이터 수정
+        if($this->forms) {
+            //dd($this->forms);
+            $this->forms['updated_at'] = date("Y-m-d H:i:s");
+
+            if (isset($this->actions['id'])) {
                 DB::table($this->actions['table'])
                     ->where('id', $this->actions['id'])
                     ->update($this->forms);
             }
-
-            // step6. 컨트롤러 메서드 호출
-            if ($controller = $this->isHook("hookUpdated")) {
-                $this->forms = $controller->hookUpdated($this->forms);
-            }
-
-            // 입력데이터 초기화
-            $this->clear();
-
-        } else {
-
-            $this->popupPermitOpen();
         }
 
+        // step6. 컨트롤러 메서드 호출
+        if ($controller = $this->isHook("hookUpdated")) {
+            $form = $controller->hookUpdated($this, $this->forms, $this->old);
+            if($form && is_array($form)) {
+                $this->forms = $form;
+            } else if($form === false) {
+                // 오류처리 팝업창
+                $this->error = true;
+                return false;
+            }
+        }
+
+        // 입력데이터 초기화
+        //$this->clear();
+        $this->forms = [];
     }
+
+
+
+
 
 
 

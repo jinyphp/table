@@ -1,23 +1,23 @@
 <?php
 /**
- *
+ * 입력 데이터를 php 설정파일로 저장합니다.
  */
 namespace Jiny\Table\Http\Livewire;
 
 use Livewire\Component;
-use Illuminate\Support\Facades\DB;
-
 use Illuminate\Support\Facades\Validator;
 
 class WireConfig extends Component
 {
+    use \Jiny\Table\Http\Livewire\Hook;
     use \Jiny\Table\Http\Livewire\Permit;
 
     public $actions;
     public $filename;
 
-    public $back=false;
-    public $url;
+    //public $back=false;
+    //public $url;
+    public $redirect;
 
     public $forms=[];
 
@@ -27,12 +27,18 @@ class WireConfig extends Component
         $this->configLoading();
     }
 
+    /**
+     * 설정 파일명 얻기
+     */
     private function filename($filename)
     {
         $path = config_path().DIRECTORY_SEPARATOR.$this->filename.".php";
         return $path;
     }
 
+    /**
+     * 데이터 읽기
+     */
     private function configLoading()
     {
         if(isset($this->actions['filename'])) {
@@ -41,21 +47,19 @@ class WireConfig extends Component
 
         if ($this->filename) {
             $path = $this->filename($this->filename);
-            //$path = config_path().DIRECTORY_SEPARATOR.$this->filename.".php";
             if (file_exists($path)) {
                 $this->forms = config( str_replace('/','.',$this->filename) );
             }
         }
     }
 
+    /**
+     * UI 출력
+     */
     public function render()
     {
-        // 컨트롤러 메서드 호출
-        if(isset($this->actions['controller'])) {
-            $controller = $this->actions['controller']::getInstance($this);
-            if(method_exists($controller, "hookCreating")) {
-                $controller->hookCreating($this);
-            }
+        if ($controller = $this->isHook("hookCreating")) {
+            $controller->hookCreating($this);
         }
 
         return view("jinytable::livewire.form");
@@ -82,24 +86,31 @@ class WireConfig extends Component
             #// $this->forms['created_at'] = date("Y-m-d H:i:s");
             $this->forms['updated_at'] = date("Y-m-d H:i:s");
 
-            // 컨트롤러 메서드 호출
-            if(isset($this->actions['controller'])) {
-                $controller = $this->actions['controller']::getInstance($this);
-                if(method_exists($controller, "hookStoring")) {
-                    $form = $controller->hookStoring($this, $this->forms);
-                } else {
-                    $form = $this->forms;
-                }
+            // Before Hook
+            if ($controller = $this->isHook("hookStoring")) {
+                $form = $controller->hookStoring($this, $this->forms);
             } else {
                 $form = $this->forms;
             }
 
+
             // 설정값을 파일로 저장
             if ($this->filename) {
                 $file = $this->convToPHP($form);
+
+                // PHP 설정파일명
                 $path = $this->filename($this->filename);
-                //$path = config_path().DIRECTORY_SEPARATOR.$this->filename.".php";
+
+                // 설정 디렉터리 검사
+                $info = pathinfo($path);
+                if(!is_dir($info['dirname'])) mkdir($info['dirname'],0755, true);
+
                 file_put_contents($path, $file);
+            }
+
+            // After Hook
+            if ($controller = $this->isHook("hookStored")) {
+                $controller->hookStored($this, $form);
             }
 
         } else {
@@ -134,8 +145,8 @@ return ".$str.";";
 
     private function goToIndex()
     {
-        if ($this->back && $this->url) {
-            return redirect()->route($this->url);
+        if ($this->redirect) {
+            return redirect()->to($this->redirect);
         }
     }
 

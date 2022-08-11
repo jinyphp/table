@@ -1,6 +1,5 @@
-
 {{-- 목록을 출력하기 위한 템플릿 --}}
-<x-theme theme="admin.sidebar2">
+<x-theme theme="admin.sidebar">
     <x-theme-layout>
         <!-- start page title -->
         @if (isset($actions['view_title']) && !empty($actions['view_title']))

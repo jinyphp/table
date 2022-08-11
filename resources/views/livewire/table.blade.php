@@ -28,9 +28,14 @@
         </div>
         {{-- footer --}}
         <div class="p-2">
+
             @if (isset($rows) && is_object($rows))
+                @if(method_exists($rows, "links"))
                 {{ $rows->links() }}
+                @endif
             @endif
+
+
 
 
 

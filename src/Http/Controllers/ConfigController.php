@@ -26,16 +26,19 @@ class ConfigController extends BaseController
     public function index(Request $request)
     {
         // 사용자 인증정보 체크
+
         $user = Auth::user();
         if ($user) {
             // 메뉴 설정
             $this->setUserMenu($user);
         }
 
+
         // 권한
         $this->permitCheck();
         if($this->permit['read']) {
             $view = $this->checkEditView();
+
             return view($view,[
                 'actions' => $this->actions,
                 'request' => $request

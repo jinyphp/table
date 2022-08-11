@@ -1,6 +1,7 @@
 <?php
 /**
- *
+ * 사용자 id가 있는
+ * 테이블 데이터 출력
  */
 namespace Jiny\Table\Http\Livewire;
 
@@ -13,13 +14,13 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Storage;
 
-class WireTable extends Component
+class LivewireTable extends Component
 {
     use WithPagination;
     use \Jiny\Table\Http\Livewire\Hook;
     use \Jiny\Table\Http\Livewire\Permit;
     use \Jiny\Table\Http\Livewire\CheckDelete;
-    use \Jiny\Table\Http\Livewire\DataFetch;
+    use \Jiny\Table\Http\Livewire\UserDataFetch;
 
     public $actions;
     public $paging = 10;
@@ -34,6 +35,8 @@ class WireTable extends Component
     }
 
 
+
+
     /** ----- ----- ----- ----- -----
      *  Table
      */
@@ -42,6 +45,7 @@ class WireTable extends Component
         // 1. 데이터 테이블 체크
         if(isset($this->actions['table']) && $this->actions['table']) {
             $this->setTable($this->actions['table']);
+
         } else {
             // 테이블명이 없는 경우
             return view("jinytable::error.tablename_none");
@@ -57,55 +61,63 @@ class WireTable extends Component
             }
         }
 
+
+
+
+
         // 3. 데이터를 읽어 옵니다.
         $rows = $this->dataFetch($this->actions);
+
 
 
         // 4. 후크 :: 읽어온 데이터를 후작업 합니다.
         if($rows) {
             if ($controller = $this->isHook("HookIndexed")) {
                 $rows = $controller->HookIndexed($this, $rows);
-
+                //dd($rows);
+                /*
                 if(is_null($rows)) {
                     return view("jinytable::error.message",[
                         'message'=>"HookIndexed() 호출 반환값이 없습니다."
                     ]);
                 }
+                */
             }
         }
 
 
         // 5. 내부함수 생성
-        // 팝업창 폼을 활성화 합니다.
-        $funcEditPopup = function ($item, $title)
-        {
-            $link = xLink($title)->setHref("javascript: void(0);");
-            $link->setAttribute("wire:click", "$"."emit('popupEdit','".$item->id."')");
+            // 팝업창 폼을 활성화 합니다.
+            $funcEditPopup = function ($item, $title)
+            {
+                $link = xLink($title)->setHref("javascript: void(0);");
+                $link->setAttribute("wire:click", "$"."emit('edit','".$item->id."')");
 
-            if (isset($item->enable)) {
+                if (isset($item->enable)) {
+                    if($item->enable) {
+                        return $link;
+                    } else {
+                        return xSpan($link)->style("text-decoration:line-through;");
+                    }
+                }
+
+                return $link;
+            };
+
+            // 내부함수 생성
+            // form 페이지로 url을 이동합니다.
+            $rules = $this->actions;
+            $funcEditLink = function ($item, $title) use ($rules)
+            {
+                $link = xLink($title)->setHref(route($rules['routename'].".edit", $item->id));
                 if($item->enable) {
                     return $link;
                 } else {
                     return xSpan($link)->style("text-decoration:line-through;");
                 }
-            }
-
-            return $link;
-        };
-
-        // 내부함수 생성
-        // form 페이지로 url을 이동합니다.
-        $rules = $this->actions;
-        $funcEditLink = function ($item, $title) use ($rules)
-        {
-            $link = xLink($title)->setHref(route($rules['routename'].".edit", $item->id));
-            if($item->enable) {
                 return $link;
-            } else {
-                return xSpan($link)->style("text-decoration:line-through;");
-            }
-            return $link;
-        };
+            };
+
 
         // 6. 출력 레이아아웃
         if(isset($this->actions['view_main_layout']) && $this->actions['view_main_layout']) {
@@ -113,7 +125,6 @@ class WireTable extends Component
         } else {
             $view_layout = "jinytable::livewire.table";
         }
-
 
         return view($view_layout,[
             'rows'=>$rows,
@@ -160,5 +171,8 @@ class WireTable extends Component
             DB::table('table_columns')->where('id',$col_id)->update(['display'=>"true"]);
         }
     }
+
+
+
 
 }

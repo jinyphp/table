@@ -11,6 +11,19 @@ trait Permit
     public $permit;
     public $popupPermit = false;
 
+    public $permitMessage;
+
+    public function isPermit($name)
+    {
+        if($name) {
+            if(isset($this->permit[$name])) {
+                if($this->permit[$name]) return true;
+            }
+        }
+
+        return false;
+    }
+
     public function permitCheck()
     {
         // 인증된 사용자
@@ -94,5 +107,15 @@ trait Permit
     public function popupPermitClose()
     {
         $this->popupPermit = false;
+    }
+
+    protected function permitUpdate()
+    {
+        if($this->permit['update']) {
+            return true;
+        } else {
+            $this->permitMessage = "수정 권한이 없습니다.";
+            return false;
+        }
     }
 }

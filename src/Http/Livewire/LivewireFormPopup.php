@@ -11,16 +11,13 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Livewire\WithFileUploads;
 
-class PopupForm extends Component
+class LivewireFormPopup extends Component
 {
     use WithFileUploads;
     use \Jiny\Table\Http\Livewire\Hook;
     use \Jiny\Table\Http\Livewire\Permit;
     use \Jiny\Table\Http\Livewire\Upload;
     use \Jiny\Table\Http\Livewire\Tabbar;
-
-    // CRUD 동작
-    use \Jiny\Table\Http\Livewire\FormUpdate;
 
     /**
      * LivePopupForm with AlpineJS
@@ -31,19 +28,12 @@ class PopupForm extends Component
     private $controller;
 
     public $message;
-    public $error = false;
 
-    public function closeError()
-    {
-        $this->error = false;
-        $this->message = null;
-    }
 
 
     public function mount()
     {
         $this->permitCheck();
-
     }
 
     public function render()
@@ -56,7 +46,8 @@ class PopupForm extends Component
      *  팝업창 관리
      */
     protected $listeners = [
-        'popupFormOpen','popupFormClose','popupFormCreate',
+        'popupFormOpen','popupFormClose',
+        'create','popupFormCreate',
         'edit','popupEdit'
     ];
     public $popupForm = false;
@@ -71,19 +62,18 @@ class PopupForm extends Component
         $this->popupForm = false;
     }
 
-    public function popupFormCreate($value=null)
-    {
-        // 신규 삽입을 위한 데이터 초기화
-        $this->formInitField();
-
-        // create 메소드를 호출합니다.
-        return $this->create($value);
-    }
 
 
     /** ----- ----- ----- ----- -----
      *  신규 데이터 삽입
      */
+
+    public function popupFormCreate($value=null)
+    {
+        // create 메소드를 호출합니다.
+        return $this->create($value);
+    }
+
     private function formInitField()
     {
         $this->forms = [];
@@ -92,6 +82,9 @@ class PopupForm extends Component
 
     public function create($value=null)
     {
+        // 신규 삽입을 위한 데이터 초기화
+        $this->formInitField();
+
         // 삽입 권한이 있는지 확인
         if($this->permit['create']) {
             unset($this->actions['id']);
@@ -99,12 +92,8 @@ class PopupForm extends Component
             // 후킹:: 컨트롤러 메서드 호출
             if ($controller = $this->isHook("hookCreating")) {
                 $form = $controller->hookCreating($this, $value);
-                if($form && is_array($form)) {
+                if($form) {
                     $this->forms = $form;
-                } else if($form === false) {
-                    // 오류처리 팝업창
-                    $this->error = true;
-                    return false;
                 }
             }
 
@@ -117,6 +106,7 @@ class PopupForm extends Component
         }
     }
 
+    public $last_id;
     public function store()
     {
         $this->message = null;
@@ -138,28 +128,20 @@ class PopupForm extends Component
             // 4. 컨트롤러 메서드 호출
             if ($controller = $this->isHook("hookStoring")) {
                 $form = $controller->hookStoring($this, $this->forms);
-                if($form === false) {
-                    // 오류처리 팝업창
-                    $this->error = true;
-                    return false;
-                }
             } else {
                 $form = $this->forms;
             }
 
             // 5. 데이터 삽입
             if($form) {
+                //dd($form);
                 $id = DB::table($this->actions['table'])->insertGetId($form);
                 $form['id'] = $id;
+                $this->last_id = $id;
 
                 // 6. 컨트롤러 메서드 호출
                 if ($controller = $this->isHook("hookStored")) {
-                    $result = $controller->hookStored($this, $form);
-                    if($result === false) {
-                        // 오류처리 팝업창
-                        $this->error = true;
-                        return false;
-                    }
+                    $controller->hookStored($this, $form);
                 }
             }
 
@@ -177,39 +159,159 @@ class PopupForm extends Component
         }
     }
 
-    // 취소 및 form 입력항목 초기화
+
+    /**
+     * 입력 데이터 취소 및 초기화
+     */
     public function cancel()
     {
         $this->forms = [];
     }
 
-    public function clear()
-    {
-        $this->forms = [];
-    }
-
-
-
-
 
     /** ----- ----- ----- ----- -----
-     *  데이터 삭제 동작
-     *  삭제는 2단계로 동작합니다. 삭제 버튼을 클릭하면, 실제 동작 버튼이 활성화 됩니다.
+     *  데이터 수정
      */
-    public $confirm = false;
-
-    public function deleteConfirm()
+    public function popupEdit($id)
     {
-        if($this->permit['delete']) {
-            $this->confirm = true;
+        $this->edit($id);
+    }
+
+    public function edit($id)
+    {
+        if($this->permit['update']) {
+            $this->popupFormOpen();
+
+            if($id) {
+                $this->actions['id'] = $id;
+            }
+
+            // 컨트롤러 메서드 호출
+            if ($controller = $this->isHook("hookEditing")) {
+                $this->forms = $controller->hookEditing($this, $this->forms);
+            }
+
+            if (isset($this->actions['id'])) {
+                $row = DB::table($this->actions['table'])->find($this->actions['id']);
+                $this->setForm($row);
+            }
+
+            // 컨트롤러 메서드 호출
+            if ($controller = $this->isHook("hookEdited")) {
+                $this->forms = $controller->hookEdited($this, $this->forms);
+            }
+
         } else {
-            $this->popupFormClose();
             $this->popupPermitOpen();
         }
     }
 
-    public function delete()
+    private function setForm($row)
     {
+        foreach ($row as $key => $value) {
+            $this->forms[$key] = $value;
+        }
+    }
+
+    public $old=[];
+    public function getOld($key=null)
+    {
+        if ($key) {
+            return $this->old[$key];
+        }
+        return $this->old;
+    }
+
+    public function update()
+    {
+        if($this->permit['update']) {
+            // step1. 수정전, 원본 데이터 읽기
+            $origin = DB::table($this->actions['table'])->find($this->actions['id']);
+            foreach ($origin as $key => $value) {
+                $this->old[$key] = $value;
+            }
+
+            // step2. 유효성 검사
+            if (isset($this->actions['validate'])) {
+                $validator = Validator::make($this->forms, $this->actions['validate'])->validate();
+            }
+
+            // step3. 컨트롤러 메서드 호출
+            if ($controller = $this->isHook("hookUpdating")) {
+                $this->forms = $controller->hookUpdating($this, $this->forms, $this->old);
+            }
+
+
+            // step4. 파일 업로드 체크
+            $this->fileUpload();
+            // uploadfile 필드 조회
+            $fields = DB::table('uploadfile')->where('table', $this->actions['table'])->get();
+            foreach($fields as $item) {
+                $key = $item->field; // 업로드 필드명
+                if($origin->$key != $this->forms[$key]) {
+                    ## 이미지를 수정하는 경우, 기존 이미지는 삭제합니다.
+                    Storage::delete($origin->$key);
+                }
+            }
+
+
+            // step5. 데이터 수정
+            if($this->forms) {
+                //dd($this->forms);
+                $this->forms['updated_at'] = date("Y-m-d H:i:s");
+
+                DB::table($this->actions['table'])
+                    ->where('id', $this->actions['id'])
+                    ->update($this->forms);
+            }
+
+            // step6. 컨트롤러 메서드 호출
+            if ($controller = $this->isHook("hookUpdated")) {
+                $this->forms = $controller->hookUpdated($this, $this->forms, $this->old);
+            }
+
+            // 입력데이터 초기화
+            $this->cancel();
+
+            // 팝업창 닫기
+            $this->popupFormClose();
+
+            // Livewire Table을 갱신을 호출합니다.
+            $this->emit('refeshTable');
+        } else {
+
+            $this->popupPermitOpen();
+        }
+    }
+
+
+
+    /** ----- ----- ----- ----- -----
+     *  데이터 삭제
+     *  삭제는 2단계로 동작합니다. 삭제 버튼을 클릭하면, 실제 동작 버튼이 활성화 됩니다.
+     */
+    public $popupDelete = false;
+    public $confirm = false;
+    public function delete($id=null)
+    {
+        if($this->permit['delete']) {
+            $this->popupDelete = true;
+
+        } else {
+            //$this->popupFormClose();
+            //$this->popupPermitOpen();
+        }
+    }
+
+    public function deleteCancel()
+    {
+        $this->popupDelete = false;
+    }
+
+    public function deleteConfirm()
+    {
+        $this->popupDelete = false;
+
         if($this->permit['delete']) {
             $row = DB::table($this->actions['table'])->find($this->actions['id']);
             //dd($row);
@@ -221,11 +323,6 @@ class PopupForm extends Component
             // 컨트롤러 메서드 호출
             if ($controller = $this->isHook("hookDeleting")) {
                 $row = $controller->hookDeleting($this, $form);
-
-                // 후크에서 false로 반환된 경우, 삭제동작 취소
-                if($row === false) {
-                    return false;
-                }
             }
 
             // uploadfile 필드 조회
@@ -252,6 +349,7 @@ class PopupForm extends Component
 
             // 팝업창 닫기
             $this->popupFormClose();
+            $this->popupDelete = false;
 
             // Livewire Table을 갱신을 호출합니다.
             $this->emit('refeshTable');
@@ -260,7 +358,10 @@ class PopupForm extends Component
             $this->popupFormClose();
             $this->popupPermitOpen();
         }
+
     }
+
+
 
 
 
