@@ -40,6 +40,7 @@ trait FormUpdate
             $this->editProcess($id); // form 처리
         } else {
             // 권한없음 팝업창 출력
+            //dd("권환없음");
             $this->popupPermitOpen();
         }
     }
@@ -67,6 +68,8 @@ trait FormUpdate
         if ($controller = $this->isHook("hookEdited")) {
             $this->forms = $controller->hookEdited($this, $this->forms);
         }
+
+
     }
 
     ## form 값을 설정합니다.
@@ -91,7 +94,11 @@ trait FormUpdate
     {
         if($this->permitUpdate()) {
             // 데이터 수정 진행
-            $this->updateProcess();
+            $result = $this->updateProcess();
+            if(is_null($result)) {
+                return;
+            }
+
 
             // 팝업창 닫기
             $this->popupFormClose();
@@ -121,6 +128,11 @@ trait FormUpdate
         // step3. 컨트롤러 메서드 호출
         if ($controller = $this->isHook("hookUpdating")) {
             $form = $controller->hookUpdating($this, $this->forms, $this->old);
+            if(is_null($form)) {
+                // 후크에서 오류로 null을 반환하는 경우
+                // 동작중단
+                return null;
+            } else
             if($form && is_array($form)) {
                 $this->forms = $form;
             } else if($form === false) {
@@ -136,11 +148,9 @@ trait FormUpdate
         $this->checkEditUploadFile($origin);
 
 
-        // step5. 데이터 수정
+        // step5. DB 데이터 수정
         if($this->forms) {
-            //dd($this->forms);
             $this->forms['updated_at'] = date("Y-m-d H:i:s");
-
             DB::table($this->actions['table'])
                 ->where('id', $this->actions['id'])
                 ->update($this->forms);
@@ -160,6 +170,8 @@ trait FormUpdate
 
         // 입력데이터 초기화
         $this->cancel();
+
+        return true;
     }
 
 }

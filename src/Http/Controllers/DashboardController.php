@@ -51,7 +51,7 @@ class DashboardController extends BaseController
         $this->checkRequestQuery($request);
 
 
-        // 메뉴 설정
+        // 사용자 메뉴 설정
         $user = Auth::user();
         if($user) {
             $this->setUserMenu($user);

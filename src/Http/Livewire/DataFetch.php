@@ -4,6 +4,9 @@
  */
 namespace Jiny\Table\Http\Livewire;
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 trait DataFetch
 {
     /** ----- ----- ----- ----- -----
@@ -11,15 +14,24 @@ trait DataFetch
      */
     public $dataType = "table";
     protected $dbSelect;
+    protected $db;
+
     public function setTable($table)
     {
         // 외부 별도 클래스로 처리
-        $this->dbSelect = new \Jiny\Table\Database\Select($table);
+        //$this->dbSelect = new \Jiny\Table\Database\Select($table);
+        $this->db = DB::table($table);
         return $this;
     }
+    public function database()
+    {
+        return $this->db;
+    }
+
+
     public function DB()
     {
-        return $this->dbSelect->DB;
+        return $this->db;
     }
 
     protected function dataFetch($actions)
@@ -52,9 +64,9 @@ trait DataFetch
             //  3.4 최종 데이터 읽기
             //  페이징이 없는 경우, 전체 읽기
             if(isset($this->paging) && is_numeric($this->paging) ) {
-                $rows = $this->dbSelect->paginate($this->paging);
+                $rows = $this->db->paginate($this->paging);
             } else {
-                $rows = $this->dbSelect->get();
+                $rows = $this->db->get();
             }
 
             //  3.5

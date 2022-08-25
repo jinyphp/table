@@ -138,11 +138,15 @@ class PopupForm extends Component
             // 4. 컨트롤러 메서드 호출
             if ($controller = $this->isHook("hookStoring")) {
                 $form = $controller->hookStoring($this, $this->forms);
+                if(is_null($form)) {
+                    return;
+                }
                 if($form === false) {
                     // 오류처리 팝업창
                     $this->error = true;
                     return false;
                 }
+
             } else {
                 $form = $this->forms;
             }
