@@ -74,11 +74,15 @@ class AdminController extends BaseController
                 {
                     $view = $this->actions['view_main'];
                 } else {
+                    //dump($this->actions['view_main']);
+                    // Menus::admin.menu_item.main
                     $view = "jinytable::main";
                 }
             } else {
                 $view = "jinytable::main";
             }
+            //$view = "Menus::admin.menu_item.main";
+            //dd($this->actions['view_main']);
 
             // view 전달 데이터 정리
             $data = [];
