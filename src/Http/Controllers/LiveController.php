@@ -63,10 +63,13 @@ class LiveController extends BaseController
         $this->checkRequestQuery($request);
 
         // 로그인: 사용자 메뉴 설정
+        /*
         $user = Auth::user();
         if($user) {
             $this->setUserMenu($user);
         }
+        */
+        $this->menu_init();
 
 
         // 권한

@@ -52,8 +52,11 @@ class FileController extends BaseController
 
 
         // 메뉴 설정
+        /*
         $user = Auth::user();
         $this->setUserMenu($user);
+        */
+        $this->menu_init();
 
 
         // 권한
