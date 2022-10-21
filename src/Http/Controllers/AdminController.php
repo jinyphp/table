@@ -50,6 +50,7 @@ class AdminController extends BaseController
      */
     public function index(Request $request)
     {
+        
         return $this->home($request);
     }
 
@@ -62,7 +63,9 @@ class AdminController extends BaseController
         // 메뉴 설정
         //$user = Auth::user();
         //$this->setUserMenu($user);
+        //
         $this->menu_init();
+        //dd("11122333");
 
         // 권한
         $this->permitCheck();

@@ -67,12 +67,16 @@ trait SetMenu
             $Menu = xMenu();
 
             // 메뉴값이 없는 경우 actions 정보를 참조
-            //$menuId = _getKey($this->actions['menu']);
-            $menuId = _getValue($this->actions['menu']);
+            if(isset($this->actions['menu']) and $this->actions['menu']) {
+                //dd($this->actions['menu']);
+                //$menuId = _getKey($this->actions['menu']);
+                $menuId = _getValue($this->actions['menu']);
 
-            $Menu->setPath($this->MENU_PATH . DIRECTORY_SEPARATOR . $menuId . ".json");
+                $Menu->setPath($this->MENU_PATH . DIRECTORY_SEPARATOR . $menuId . ".json");
 
-            return $menuId;
+                return $menuId;
+            }
+            
         }
     }
 
