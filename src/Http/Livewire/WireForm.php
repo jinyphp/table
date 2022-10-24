@@ -361,9 +361,11 @@ class WireForm extends Component
      *  삭제는 2단계로 동작합니다. 삭제 버튼을 클릭하면, 실제 동작 버튼이 활성화 됩니다.
      */
     public $confirm = false;
+    public $delete_code;
 
     public function deleteConfirm()
     {
+        // 삭제권환 체크
         if($this->permit['delete']) {
             $this->confirm = true;
         } else {

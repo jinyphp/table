@@ -62,17 +62,21 @@ class JinyTableServiceProvider extends ServiceProvider
 
 
             Livewire::component('WireTable', \Jiny\Table\Http\Livewire\WireTable::class);
+            Livewire::component('WireCheckDelete', \Jiny\Table\Http\Livewire\WireCheckDelete::class);
             Livewire::component('AdminTable', \Jiny\Table\Http\Livewire\AdminTable::class);
             Livewire::component('LivewireTable', \Jiny\Table\Http\Livewire\LivewireTable::class);
 
 
+            Livewire::component('LivewireFormPopup', \Jiny\Table\Http\Livewire\LivewireFormPopup::class); // 팝업형
+            Livewire::component('Popup-LiveForm', \Jiny\Table\Http\Livewire\PopupForm::class); // 팝업형
+            Livewire::component('Popup-LiveManual', \Jiny\Table\Http\Livewire\PopupManual::class);
 
 
             Livewire::component('WireForm', \Jiny\Table\Http\Livewire\WireForm::class); // 페이지 이동
-            Livewire::component('Popup-LiveForm', \Jiny\Table\Http\Livewire\PopupForm::class); // 팝업형
-            Livewire::component('LivewireFormPopup', \Jiny\Table\Http\Livewire\LivewireFormPopup::class); // 팝업형
+            
+            
 
-            Livewire::component('Popup-LiveManual', \Jiny\Table\Http\Livewire\PopupManual::class);
+            
 
 
 

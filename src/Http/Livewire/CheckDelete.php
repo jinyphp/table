@@ -6,14 +6,15 @@ use Illuminate\Support\Facades\Storage;
 
 trait CheckDelete
 {
-
-
     /** ----- ----- ----- ----- -----
      *  checkBox Selecting
      */
 
     public $selectedall = false;
     public $selected = [];
+
+    public $delete_code;
+    public $delete_confirm_code;
 
     # Livewire Hook
     public function updatedSelectedall($value)
@@ -26,6 +27,8 @@ trait CheckDelete
         } else {
             $this->selected = [];
         }
+
+        //$this->emit('deleteCheck', $this->selected);
     }
 
     # Livewire Hook
@@ -36,6 +39,8 @@ trait CheckDelete
         } else {
             $this->selectedall = false;
         }
+
+        //$this->emit('deleteCheck', $this->selected);
     }
 
     # Livewire Hook
@@ -45,6 +50,26 @@ trait CheckDelete
         // 기존에 선택된 체크박스는 초기화 함.
         $this->selectedall = false;
         $this->selected = [];
+    }
+
+    private function generateRandomString($length = 10) {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
+    }
+
+    public function delete_code_apply()
+    {
+        $this->delete_confirm_code = $this->delete_code;
+    }
+
+    public function delete_code_reload()
+    {
+        $this->delete_code = $this->generateRandomString(10);
     }
 
 
@@ -57,8 +82,14 @@ trait CheckDelete
 
     public function popupDeleteOpen()
     {
+        // 삭제권환
         if($this->permit['delete']) {
             $this->popupDelete = true;
+
+            // 삭제코드
+            $this->delete_code = $this->generateRandomString(10);
+            $this->delete_confirm_code = null;
+
         } else {
             $this->popupPermitOpen();
         }
@@ -68,11 +99,27 @@ trait CheckDelete
     {
         // 삭제 확인창을 닫기
         $this->popupDelete = false;
+
+        $this->delete_code = null;
+        $this->delete_confirm_code = null;
+    }
+
+    // alias
+    public function deleteConfirm()
+    {
+        $this->confirmDelete();
     }
 
     public function confirmDelete()
     {
-        $this->checkeDelete();
+        if($this->delete_confirm_code == $this->delete_code) {
+            $this->checkeDelete();         
+
+            $this->delete_confirm_code = null;
+            $this->delete_code = null;
+        } else {
+            session()->flash('message', "메뉴코드가 일치하지 않습니다!");
+        }        
     }
 
     public function checkeDelete()
@@ -128,4 +175,6 @@ trait CheckDelete
             $this->popupPermitOpen();
         }
     }
+
+    
 }

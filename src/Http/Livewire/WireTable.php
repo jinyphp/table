@@ -74,9 +74,17 @@ class WireTable extends Component
             }
         }
 
+        return view($this->getLayoutView(), [
+            'rows'=>$rows,
+            'popupEdit'=>$this->editPopupFunc(),
+            'editLink'=>$this->editLinkFunc()
+        ]);
+    }
 
-        // 5. 내부함수 생성
-        // 팝업창 폼을 활성화 합니다.
+    // 5. 내부함수 생성
+    // 팝업창 폼을 활성화 합니다.
+    private function editPopupFunc()
+    {
         $funcEditPopup = function ($item, $title)
         {
             $link = xLink($title)->setHref("javascript: void(0);");
@@ -93,8 +101,13 @@ class WireTable extends Component
             return $link;
         };
 
-        // 내부함수 생성
-        // form 페이지로 url을 이동합니다.
+        return $funcEditPopup;
+    }
+
+    // 내부함수 생성
+    // form 페이지로 url을 이동합니다.
+    private function editLinkFunc()
+    {
         $rules = $this->actions;
         $funcEditLink = function ($item, $title) use ($rules)
         {
@@ -106,22 +119,25 @@ class WireTable extends Component
             }
             return $link;
         };
+        return $funcEditLink;
+    }
 
-        // 6. 출력 레이아아웃
-        if(isset($this->actions['view_main_layout']) && $this->actions['view_main_layout']) {
-            $view_layout = $this->actions['view_main_layout'];
-        } else {
-            $view_layout = "jinytable::livewire.table";
+
+    private function getLayoutView()
+    {
+        // 기본값
+        $view = "jinytable::livewire.table";
+
+        // 사용자값
+        if(isset($this->actions['view_main_layout'])) {
+            if($this->actions['view_main_layout']) {
+                $view = $this->actions['view_main_layout'];
+            }            
         }
 
-
-        return view($view_layout,[
-            'rows'=>$rows,
-            'popupEdit'=>$funcEditPopup,
-            'editLink'=>$funcEditLink
-        ]);
-
+        return $view;
     }
+
 
     /* ----- ----- ----- ----- ----- */
 

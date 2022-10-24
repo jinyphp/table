@@ -1,6 +1,7 @@
 {{-- 목록을 출력하기 위한 템플릿 --}}
 <x-theme theme="admin.sidebar">
     <x-theme-layout>
+
         <!-- Module Title Bar -->
         @if(Module::has('Titlebar'))
             @livewire('TitleBar', ['actions'=>$actions])
@@ -30,7 +31,10 @@
         </script>
         @endpush
 
+        <!-- 테이블 목록 출력  -->
         @livewire('WireTable', ['actions'=>$actions])
+
+
 
         @livewire('Popup-LiveForm', ['actions'=>$actions])
 
@@ -40,7 +44,6 @@
         @include('jinytable::setActionRule')
 
         {{-- popup UI Design mode --}}
-        <!-- ui design form -->
         @livewire('DesignForm')
 
     </x-theme-layout>

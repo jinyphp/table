@@ -50,7 +50,7 @@ class AdminController extends BaseController
      */
     public function index(Request $request)
     {
-        
+        // 목록을 출력합니다.
         return $this->home($request);
     }
 
@@ -61,31 +61,13 @@ class AdminController extends BaseController
         $this->checkRequestQuery($request);
 
         // 메뉴 설정
-        //$user = Auth::user();
-        //$this->setUserMenu($user);
-        //
         $this->menu_init();
-        //dd("11122333");
 
         // 권한
         $this->permitCheck();
         if($this->permit['read']) {
 
-            // 메인뷰 페이지...
-            if (isset($this->actions['view_main'])) {
-                if (view()->exists($this->actions['view_main']))
-                {
-                    $view = $this->actions['view_main'];
-                } else {
-                    //dump($this->actions['view_main']);
-                    // Menus::admin.menu_item.main
-                    $view = "jinytable::main";
-                }
-            } else {
-                $view = "jinytable::main";
-            }
-            //$view = "Menus::admin.menu_item.main";
-            //dd($this->actions['view_main']);
+            $view = $this->getLayoutMain();
 
             // view 전달 데이터 정리
             $data = [];
@@ -106,6 +88,23 @@ class AdminController extends BaseController
             'actions'=>$this->actions,
             'request'=>$request
         ]);
+
+    }
+
+    private function getLayoutMain()
+    {
+        // 기본값
+        $view = "jinytable::layout.main";
+
+        // 사용자 정의값
+        if (isset($this->actions['view_main'])) {
+            if (view()->exists($this->actions['view_main']))
+            {
+                $view = $this->actions['view_main'];
+            }
+        } 
+
+        return $view;
     }
 
 

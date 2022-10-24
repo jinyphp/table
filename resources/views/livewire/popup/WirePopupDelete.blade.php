@@ -1,5 +1,4 @@
-{{-- 선택삭제 --}}
-@if ($popupDelete)
+@if ($popupForm)
     <x-boot-dialog wire:model="popupDelete" maxWidth="2xl" opacity="opacity-30">
         <x-slot name="title">
             {{__('레코드 삭제')}}
@@ -16,7 +15,7 @@
                         <br>
                         삭제를 원하시면 코드를 입력해 주세요.
                     </h4>
-                    {{--
+
                     <div class="d-flex align-items-center">
                         <div class="text-gray-600 mt-2 py-2">
                             삭제코드 : {{$delete_code}}
@@ -43,7 +42,6 @@
                             </span>
                         </div>
                     </div>
-                    --}}
                     
 
                     {{-- 메시지출력 --}}
@@ -61,11 +59,9 @@
             <button class="btn btn-secondary" wire:click="deleteCancel">
                 취소
             </button>
-            <button class="btn btn-danger" wire:click="checkeDelete">
+            <button class="btn btn-danger" wire:click="deleteConfirm">
                 예, 삭제를 진행합니다.
             </button>
         </x-slot>
     </x-boot-dialog>
-
-
 @endif

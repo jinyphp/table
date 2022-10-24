@@ -22,6 +22,8 @@ trait FormUpdate
     ## Popup창을 통한 Edit폼 출력
     public function popupEdit($id)
     {
+        //dd("dfas");
+
         //권환체트
         if($this->permitUpdate()) {
             $this->popupFormOpen();

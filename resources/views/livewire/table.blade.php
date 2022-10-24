@@ -6,10 +6,11 @@
         @includeIf($actions['view_filter'])
     @endif
 
+
     @if (session()->has('message'))
         <div class="alert alert-success">{{session('message')}}</div>
     @endif
-
+    
     <div class="bg-white">
         {{-- header --}}
         <div class="p-2">
@@ -20,12 +21,14 @@
                 ->setWidth("tiny")
             !!}
         </div>
+        
         {{-- body --}}
         <div class="p-2 overflow-x-auto">
             @if (isset($actions['view_list']))
                 @includeIf($actions['view_list'])
             @endif
         </div>
+
         {{-- footer --}}
         <div class="p-2">
 
@@ -35,29 +38,11 @@
                 @endif
             @endif
 
-
-
-
-
             {{-- 선택갯수 표시--}}
-            <span id="selected-num">{{count($selected)}}</span>
-            <span class="px-2">selected</span>
+            @include("jinytable::livewire.inc.delete_selected")
 
-            @if (count($selected))
-            <x-button danger small id="selected-delete" wire:click="popupDeleteOpen">
-                선택삭제
-            </x-button>
-            @else
-            <x-button danger small id="selected-delete" wire:click="popupDeleteOpen" disabled>
-                선택삭제
-            </x-button>
-            @endif
         </div>
     </div>
-
-
-    {{-- 선택삭제 --}}
-    @include("jinytable::livewire.popup.delete")
 
     {{-- 퍼미션 알람--}}
     @include("jinytable::error.popup.permit")

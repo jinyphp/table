@@ -1,7 +1,7 @@
-{{--
-    페이지 링크로 form 출력을 위한 양식 tag 입니다.
---}}
 <div>
+    {{--
+        페이지 링크로 form 출력을 위한 양식 tag 입니다.
+    --}}
     <x-loading-indicator/>
 
     <x-card>
