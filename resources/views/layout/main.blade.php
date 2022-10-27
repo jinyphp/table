@@ -36,7 +36,9 @@
 
 
 
-        @livewire('Popup-LiveForm', ['actions'=>$actions])
+        {{-- @livewire('Popup-LiveForm', ['actions'=>$actions]) --}}
+        @livewire('LivewireFormPopup', ['actions'=>$actions])
+        
 
         @livewire('Popup-LiveManual')
 

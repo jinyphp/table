@@ -88,6 +88,11 @@ class LivewireFormPopup extends Component
         // 신규 삽입을 위한 데이터 초기화
         $this->formInitField();
 
+        $this->createRef($value);
+    }
+
+    public function createRef($value=null)
+    {
         // 삽입 권한이 있는지 확인
         if($this->permit['create']) {
             unset($this->actions['id']);
@@ -200,6 +205,15 @@ class LivewireFormPopup extends Component
                 $this->setForm($row);
             }
 
+            // checkbox 처리
+            foreach($this->forms as $key => $value) {
+                // 필드명이 _로 시작되는 경우 checkbox
+                if($key[0] == '_') {
+                    if($value == '0') $this->forms[$key] = null;
+                }
+            }
+            
+
             // 컨트롤러 메서드 호출
             if ($controller = $this->isHook("hookEdited")) {
                 $this->forms = $controller->hookEdited($this, $this->forms);
@@ -235,6 +249,8 @@ class LivewireFormPopup extends Component
                 $this->old[$key] = $value;
             }
 
+            
+
             // step2. 유효성 검사
             if (isset($this->actions['validate'])) {
                 $validator = Validator::make($this->forms, $this->actions['validate'])->validate();
@@ -255,6 +271,14 @@ class LivewireFormPopup extends Component
                 if($origin->$key != $this->forms[$key]) {
                     ## 이미지를 수정하는 경우, 기존 이미지는 삭제합니다.
                     Storage::delete($origin->$key);
+                }
+            }
+
+            // checkbox 처리
+            foreach($this->forms as $key => $value) {
+                // 필드명이 _로 시작되는 경우 checkbox
+                if($key[0] == '_') {
+                    if($value == null) $this->forms[$key] = 0;
                 }
             }
 

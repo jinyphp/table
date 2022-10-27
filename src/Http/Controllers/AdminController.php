@@ -54,7 +54,13 @@ class AdminController extends BaseController
         return $this->home($request);
     }
 
+    // alias
+    public function list(Request $request, $args=[])
+    {
+        return $this->home($request, $args);
+    }
 
+    // index-home
     public function home(Request $request, $args=[])
     {
         $this->checkRequestNesteds($request);

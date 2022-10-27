@@ -107,15 +107,16 @@ public function hookStoring($wire,$form)
 
 ## 수정폼이 실행될때 호출됩니다.
 
+수정폼이 호출될때 실행되는 후크 동작입니다.
 ```php
-public function hookEditing($wire, $form, $old)
+public function hookEditing($wire, $form)
 {
     return $form;
 }
 ```
 
 ```php
-public function hookEdited($wire, $form, $old)
+public function hookEdited($wire, $form)
 {
     return $form;
 }

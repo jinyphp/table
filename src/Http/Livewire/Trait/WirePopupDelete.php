@@ -118,7 +118,8 @@ trait WirePopupDelete
             $this->popupDelete = false;
 
             // Livewire Table을 갱신을 호출합니다.
-            $this->emit('refeshTable');
+            //$this->emit('refeshTable');
+            $this->emit('refeshDelete');
 
         } else {
             $this->popupFormClose();

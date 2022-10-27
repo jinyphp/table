@@ -74,7 +74,7 @@ class JinyTableServiceProvider extends ServiceProvider
 
             Livewire::component('WireForm', \Jiny\Table\Http\Livewire\WireForm::class); // 페이지 이동
             
-            
+            Livewire::component('WireDetail', \Jiny\Table\Http\Livewire\WireDetail::class); 
 
             
 

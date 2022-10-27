@@ -141,10 +141,15 @@ class WireTable extends Component
 
     /* ----- ----- ----- ----- ----- */
 
-    protected $listeners = ['refeshTable'];
+    protected $listeners = ['refeshTable','refeshDelete'];
     public function refeshTable()
     {
         // 페이지를 재갱신 합니다.
+    }
+
+    public function refeshDelete()
+    {
+        // 삭제후 페이지를 재갱신 합니다.
     }
 
     public function edit($id)

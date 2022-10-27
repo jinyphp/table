@@ -120,3 +120,24 @@ function xCellAvatar($item, $key)
 function xColumnLink($title, $href) {
 
 }
+
+/**
+ * FormHook
+ */
+if(!function_exists("formHookCheckboxEdit")) {
+    function formHookCheckboxEdit(&$value)
+    {
+        if($value == 0){
+            $value = null;
+        }
+    }
+};
+
+if(!function_exists("formHookCheckboxUpdate")) {
+    function formHookCheckboxUpdate(&$value)
+    {
+        if($value == null){
+            $value = 0;
+        }
+    }
+};
