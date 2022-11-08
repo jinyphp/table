@@ -104,6 +104,14 @@ trait CheckDelete
         $this->delete_confirm_code = null;
     }
 
+    public function deleteCancel()
+    {
+        $this->popupDelete = false;
+        
+        $this->delete_code = null;
+        $this->delete_confirm_code = null;
+    }
+
     // alias
     public function deleteConfirm()
     {

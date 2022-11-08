@@ -5,7 +5,7 @@
         @if (isset($actions['view_title']) && !empty($actions['view_title']))
             @includeIf($actions['view_title'])
         @else
-            @include("jinytable::title")
+            {{-- @include("jinytable::title") --}}
         @endif
         <!-- end page title -->
 

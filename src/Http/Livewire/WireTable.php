@@ -90,12 +90,12 @@ class WireTable extends Component
             $link = xLink($title)->setHref("javascript: void(0);");
             $link->setAttribute("wire:click", "$"."emit('popupEdit','".$item->id."')");
 
-            if (isset($item->enable)) {
-                if($item->enable) {
-                    return $link;
-                } else {
-                    return xSpan($link)->style("text-decoration:line-through;");
-                }
+            if (isset($item->enable) && $item->enable) {
+                return $link;
+            } else if (isset($item->_enable) && $item->_enable) {
+                return $link;
+            } else {
+                return xSpan($link)->style("text-decoration:line-through;");
             }
 
             return $link;

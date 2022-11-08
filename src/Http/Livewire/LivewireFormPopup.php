@@ -136,6 +136,11 @@ class LivewireFormPopup extends Component
             // 4. 컨트롤러 메서드 호출
             if ($controller = $this->isHook("hookStoring")) {
                 $form = $controller->hookStoring($this, $this->forms);
+
+                // hook 오류
+                if($form === null) {
+                    return;
+                }
             } else {
                 $form = $this->forms;
             }
@@ -198,6 +203,11 @@ class LivewireFormPopup extends Component
             // 컨트롤러 메서드 호출
             if ($controller = $this->isHook("hookEditing")) {
                 $this->forms = $controller->hookEditing($this, $this->forms);
+
+                // hook 오류
+                if($this->forms === null) {
+                    return;
+                }
             }
 
             if (isset($this->actions['id'])) {
@@ -258,7 +268,11 @@ class LivewireFormPopup extends Component
 
             // step3. 컨트롤러 메서드 호출
             if ($controller = $this->isHook("hookUpdating")) {
-                $this->forms = $controller->hookUpdating($this, $this->forms, $this->old);
+                $forms = $controller->hookUpdating($this, $this->forms, $this->old);
+                if($forms === null) {
+                    return;
+                }
+                $this->forms = $forms;
             }
 
 

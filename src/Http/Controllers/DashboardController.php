@@ -51,11 +51,8 @@ class DashboardController extends BaseController
         $this->checkRequestQuery($request);
 
 
-        // 사용자 메뉴 설정
-        $user = Auth::user();
-        if($user) {
-            $this->setUserMenu($user);
-        }
+        // 메뉴 설정
+        $this->menu_init();
 
 
         // 권한
@@ -63,16 +60,7 @@ class DashboardController extends BaseController
         if($this->permit['read']) {
 
             // 메인뷰 페이지...
-            if (isset($this->actions['view_main'])) {
-                if (view()->exists($this->actions['view_main']))
-                {
-                    $view = $this->actions['view_main'];
-                } else {
-                    $view = "jinytable::dashboard.main";
-                }
-            } else {
-                $view = "jinytable::dashboard.main";
-            }
+            $view = $this->getLayoutMain();
 
             return view($view,[
                 'actions'=>$this->actions,
@@ -81,12 +69,27 @@ class DashboardController extends BaseController
         }
 
 
-
         // 권한 접속 실패
         return view("jinytable::error.permit",[
             'actions'=>$this->actions,
             'request'=>$request
         ]);
+    }
+
+    private function getLayoutMain()
+    {
+        // 기본값
+        $view = "jinytable::layout.dashboard";
+
+        // 사용자 정의값
+        if (isset($this->actions['view_main'])) {
+            if (view()->exists($this->actions['view_main']))
+            {
+                $view = $this->actions['view_main'];
+            }
+        } 
+
+        return $view;
     }
 
 
