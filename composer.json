@@ -11,15 +11,14 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "php": "^7.3|^8.0",
-        "livewire/livewire": "^2.7"
+        "php": "^8.2"
     },
     "autoload": {
         "psr-4": {
-            "Jiny\\Table\\":"src/"
+            "Jiny\\Table\\":"/"
         },
         "files" : [
-            "src/Helpers/Helper.php"
+            "Helpers/Helper.php"
         ]
     },
     "extra": {
