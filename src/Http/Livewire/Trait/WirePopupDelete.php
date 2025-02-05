@@ -79,7 +79,7 @@ trait WirePopupDelete
         $this->popupDelete = false;
 
         if($this->permit['delete']) {
-            $row = DB::table($this->actions['table'])->find($this->actions['id']);
+            $row = DB::table($this->actions['table']['name'])->find($this->actions['id']);
 
             $form = [];
             foreach($row as $key => $value) {
@@ -92,7 +92,7 @@ trait WirePopupDelete
             }
 
             // uploadfile 필드 조회
-            $fields = DB::table('uploadfile')->where('table', $this->actions['table'])->get();
+            $fields = DB::table('uploadfile')->where('table', $this->actions['table']['name'])->get();
             foreach($fields as $item) {
                 $key = $item->field; // 업로드 필드명
                 if (isset($row->$key)) {
@@ -101,7 +101,7 @@ trait WirePopupDelete
             }
 
             // 데이터 삭제
-            DB::table($this->actions['table'])
+            DB::table($this->actions['table']['name'])
                 ->where('id', $this->actions['id'])
                 ->delete();
 

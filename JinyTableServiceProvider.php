@@ -55,6 +55,73 @@ class JinyTableServiceProvider extends ServiceProvider
     {
         /* 라이브와이어 컴포넌트 등록 */
         $this->app->afterResolving(BladeCompiler::class, function () {
+            // 기본 테이블: 전체 목록을 출력합니다.
+            Livewire::component(
+                'table',
+                \Jiny\Table\Http\Livewire\Table::class);
+
+            // 검색과 페이징을 통하여 테이블을 출력합니다.
+            Livewire::component(
+                'table-filter',
+                \Jiny\Table\Http\Livewire\TableFilter::class);
+
+            // 테이블 + 선택삭제
+            Livewire::component(
+                'table-delete',
+                \Jiny\Table\Http\Livewire\TableCheckDelete::class);
+
+            // 삭제 및 생성 버튼
+            Livewire::component(
+                'table-delete-create',
+                \Jiny\Table\Http\Livewire\TableDeleteCreate::class);
+
+            // 폼 팝업
+            Livewire::component(
+                'form-popup',
+                \Jiny\Table\Http\Livewire\FormPopup::class);
+
+
+
+            // 테이블
+            Livewire::component(
+                'site-table',
+                \Jiny\Table\Http\Livewire\SiteTable::class);
+
+            Livewire::component(
+                'admin-table-none',
+                \Jiny\Table\Http\Livewire\AdminTableNone::class);
+
+            Livewire::component(
+                'admin-table',
+                \Jiny\Table\Http\Livewire\AdminTable::class);
+
+            Livewire::component(
+                'site-table-none',
+                \Jiny\Table\Http\Livewire\SiteTableNone::class);
+
+
+            // Form팝업
+            Livewire::component(
+                'site-form-popup',
+                \Jiny\Table\Http\Livewire\SiteFormPopup::class);
+
+            Livewire::component(
+                'admin-form-popup',
+                \Jiny\Table\Http\Livewire\AdminFormPopup::class);
+
+
+
+            // 트리구조 테이블블
+            Livewire::component(
+                'tree-delete-create',
+                \Jiny\Table\Http\Livewire\TreeDeleteCreate::class);
+
+            Livewire::component(
+                'tree-form-popup',
+                \Jiny\Table\Http\Livewire\TreeFormPopup::class);
+
+
+
             // AlpineJS 를 이용항 Table
             //# 모듈이동 Livewire::component('TableTitle', \Jiny\Table\Http\Livewire\TableTitle::class);
 
@@ -71,10 +138,10 @@ class JinyTableServiceProvider extends ServiceProvider
 
 
             // Livewire::component('WireForm', \Jiny\Table\Http\Livewire\WireForm::class); // 페이지 이동
-            
-            // Livewire::component('WireDetail', \Jiny\Table\Http\Livewire\WireDetail::class); 
 
-            
+            // Livewire::component('WireDetail', \Jiny\Table\Http\Livewire\WireDetail::class);
+
+
 
 
 

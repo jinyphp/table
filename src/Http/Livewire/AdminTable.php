@@ -38,8 +38,8 @@ class AdminTable extends Component
     public function render()
     {
         // 1. 데이터 테이블 체크
-        if(isset($this->actions['table']) && $this->actions['table']) {
-            $this->setTable($this->actions['table']);
+        if(isset($this->actions['table']['name']) && $this->actions['table']['name']) {
+            $this->setTable($this->actions['table']['name']);
         } else {
             // 테이블명이 없는 경우
             return view("jinytable::error.tablename_none");
@@ -346,8 +346,8 @@ class AdminTable extends Component
             }
 
             // 2.uploadfile 필드 조회
-            $fields = DB::table('uploadfile')->where('table', $this->actions['table'])->get();
-            $rows = DB::table($this->actions['table'])->whereIn('id', $this->selected)->get();
+            $fields = DB::table('uploadfile')->where('table', $this->actions['table']['name'])->get();
+            $rows = DB::table($this->actions['table']['name'])->whereIn('id', $this->selected)->get();
             foreach ($rows as $row) {
                 foreach($fields as $item) {
                     $key = $item->field; // 업로드 필드명
@@ -359,7 +359,7 @@ class AdminTable extends Component
 
             // 3.복수의 ids를 삭제합니다.
             if($this->dataType == "table") {
-                DB::table($this->actions['table'])->whereIn('id', $this->selected)->delete();
+                DB::table($this->actions['table']['name'])->whereIn('id', $this->selected)->delete();
             } else if($this->dataType == "uri") {
 
             } else if($this->dataType == "file") {

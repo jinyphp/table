@@ -129,7 +129,7 @@ DB 테이블을 조작하기 전에 실행되는 후크동작입니다.
 public function hookUpdating($wire, $form, $old)
 {
     return $form;
-     return true; // 정상
+    return true; // 정상
 }
 ```
 

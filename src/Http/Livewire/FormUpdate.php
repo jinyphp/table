@@ -62,7 +62,7 @@ trait FormUpdate
 
         // 데이터를 읽어 form필드를
         if (isset($this->actions['id'])) {
-            $row = DB::table($this->actions['table'])->find($this->actions['id']);
+            $row = DB::table($this->actions['table']['name'])->find($this->actions['id']);
             $this->setForm($row);
         }
 
@@ -117,7 +117,7 @@ trait FormUpdate
     private function updateProcess()
     {
         // step1. 수정전, 원본 데이터 읽기
-        $origin = DB::table($this->actions['table'])->find($this->actions['id']);
+        $origin = DB::table($this->actions['table']['name'])->find($this->actions['id']);
         foreach ($origin as $key => $value) {
             $this->old[$key] = $value;
         }
@@ -153,7 +153,7 @@ trait FormUpdate
         // step5. DB 데이터 수정
         if($this->forms) {
             $this->forms['updated_at'] = date("Y-m-d H:i:s");
-            DB::table($this->actions['table'])
+            DB::table($this->actions['table']['name'])
                 ->where('id', $this->actions['id'])
                 ->update($this->forms);
         }

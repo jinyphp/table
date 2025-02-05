@@ -40,8 +40,8 @@ class WireTable extends Component
     public function render()
     {
         // 1. 데이터 테이블 체크
-        if(isset($this->actions['table']) && $this->actions['table']) {
-            $this->setTable($this->actions['table']);
+        if(isset($this->actions['table']['name']) && $this->actions['table']['name']) {
+            $this->setTable($this->actions['table']['name']);
         } else {
             // 테이블명이 없는 경우
             return view("jinytable::error.tablename_none");

@@ -135,7 +135,7 @@ class WireForm extends Component
 
             // 5. 데이터 삽입
             if($form) {
-                $id = DB::table($this->actions['table'])->insertGetId($form);
+                $id = DB::table($this->actions['table']['name'])->insertGetId($form);
                 $form['id'] = $id;
 
                 // 6. 컨트롤러 메서드 호출
@@ -201,7 +201,7 @@ class WireForm extends Component
 
             // 5. 데이터 삽입
             if($form) {
-                $id = DB::table($this->actions['table'])->insertGetId($form);
+                $id = DB::table($this->actions['table']['name'])->insertGetId($form);
                 $this->forms['id'] = $id;
 
                 // 6. 컨트롤러 메서드 호출
@@ -240,7 +240,7 @@ class WireForm extends Component
 
             // 데이터를 읽어 form필드를
             if (isset($this->actions['id'])) {
-                $row = DB::table($this->actions['table'])->find($this->actions['id']);
+                $row = DB::table($this->actions['table']['name'])->find($this->actions['id']);
                 $this->setForm($row);
             }
 
@@ -290,7 +290,7 @@ class WireForm extends Component
     {
         // step1. 수정전, 원본 데이터 읽기
         if (isset($this->actions['id'])) {
-            $origin = DB::table($this->actions['table'])->find($this->actions['id']);
+            $origin = DB::table($this->actions['table']['name'])->find($this->actions['id']);
             foreach ($origin as $key => $value) {
                 $this->old[$key] = $value;
             }
@@ -327,7 +327,7 @@ class WireForm extends Component
             $this->forms['updated_at'] = date("Y-m-d H:i:s");
 
             if (isset($this->actions['id'])) {
-                DB::table($this->actions['table'])
+                DB::table($this->actions['table']['name'])
                     ->where('id', $this->actions['id'])
                     ->update($this->forms);
             }
@@ -377,7 +377,7 @@ class WireForm extends Component
     public function delete()
     {
         if($this->permit['delete']) {
-            $row = DB::table($this->actions['table'])->find($this->actions['id']);
+            $row = DB::table($this->actions['table']['name'])->find($this->actions['id']);
 
             // 컨트롤러 메서드 호출
             if ($controller = $this->isHook("hookDeleting")) {
@@ -385,7 +385,7 @@ class WireForm extends Component
             }
 
             // uploadfile 필드 조회
-            $fields = DB::table('uploadfile')->where('table', $this->actions['table'])->get();
+            $fields = DB::table('uploadfile')->where('table', $this->actions['table']['name'])->get();
             foreach($fields as $item) {
                 $key = $item->field; // 업로드 필드명
                 if (isset($row->$key)) {
@@ -394,7 +394,7 @@ class WireForm extends Component
             }
 
             // 데이터 삭제
-            DB::table($this->actions['table'])
+            DB::table($this->actions['table']['name'])
                 ->where('id', $this->actions['id'])
                 ->delete();
 

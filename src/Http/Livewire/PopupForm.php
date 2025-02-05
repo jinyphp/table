@@ -153,7 +153,7 @@ class PopupForm extends Component
 
             // 5. 데이터 삽입
             if($form) {
-                $id = DB::table($this->actions['table'])->insertGetId($form);
+                $id = DB::table($this->actions['table']['name'])->insertGetId($form);
                 $form['id'] = $id;
 
                 // 6. 컨트롤러 메서드 호출
@@ -215,7 +215,7 @@ class PopupForm extends Component
     public function delete()
     {
         if($this->permit['delete']) {
-            $row = DB::table($this->actions['table'])->find($this->actions['id']);
+            $row = DB::table($this->actions['table']['name'])->find($this->actions['id']);
             //dd($row);
             $form = [];
             foreach($row as $key => $value) {
@@ -233,7 +233,7 @@ class PopupForm extends Component
             }
 
             // uploadfile 필드 조회
-            $fields = DB::table('uploadfile')->where('table', $this->actions['table'])->get();
+            $fields = DB::table('uploadfile')->where('table', $this->actions['table']['name'])->get();
             foreach($fields as $item) {
                 $key = $item->field; // 업로드 필드명
                 if (isset($row->$key)) {
@@ -242,7 +242,7 @@ class PopupForm extends Component
             }
 
             // 데이터 삭제
-            DB::table($this->actions['table'])
+            DB::table($this->actions['table']['name'])
                 ->where('id', $this->actions['id'])
                 ->delete();
 

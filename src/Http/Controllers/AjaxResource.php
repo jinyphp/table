@@ -172,7 +172,7 @@ class AjaxResource extends BaseController
                 $forms[$key] = $value;
             }
 
-            $id = DB::table($this->actions['table'])->insertGetId($forms);
+            $id = DB::table($this->actions['table']['name'])->insertGetId($forms);
             $forms['id'] = $id;
 
             return response()->json([
@@ -206,7 +206,7 @@ class AjaxResource extends BaseController
             $this->actions['id'] = $this->actions['nesteds'][$keyId];
 
             // -----
-            $row = DB::table($this->actions['table'])->find($this->actions['id']);
+            $row = DB::table($this->actions['table']['name'])->find($this->actions['id']);
             $forms = [];
             foreach($row as $key => $item) {
                 $forms[$key] = $item;
@@ -257,7 +257,7 @@ class AjaxResource extends BaseController
                 $forms[$key] = $value;
             }
 
-            DB::table($this->actions['table'])->where('id', $id)
+            DB::table($this->actions['table']['name'])->where('id', $id)
                 ->update($forms);
 
 
@@ -283,7 +283,7 @@ class AjaxResource extends BaseController
         $this->permitCheck();
         if($this->permit['delete']) {
 
-            DB::table($this->actions['table'])->where('id', $id)->delete();
+            DB::table($this->actions['table']['name'])->where('id', $id)->delete();
 
             return response()->json([
                 'id'=>$id
@@ -315,7 +315,7 @@ class AjaxResource extends BaseController
 
             $ids = $request->ids;
             // 선택한 항목 삭제 AJAX
-            DB::table($this->actions['table'])->whereIn('id', $ids)->delete();
+            DB::table($this->actions['table']['name'])->whereIn('id', $ids)->delete();
             return response()->json(['status'=>"200", 'ids'=>$ids]);
 
         }

@@ -92,7 +92,7 @@ class DesignForm extends Component
 
             // 5. 데이터 삽입
             if($form) {
-                $id = DB::table($this->actions['table'])->insertGetId($form);
+                $id = DB::table($this->actions['table']['name'])->insertGetId($form);
                 $this->forms['id'] = $id;
 
                 // 6. 컨트롤러 메서드 호출

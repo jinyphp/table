@@ -35,7 +35,7 @@ trait Upload
             $uploadPath = $this->actions['upload']['path'];
         } else {
             // 업로드 경로가 없는경우, 테이블명으로 경로를 지정합니다.
-            $uploadPath = $this->actions['table'];
+            $uploadPath = $this->actions['table']['name'];
         }
 
         if($visible=="public") {
@@ -73,7 +73,7 @@ trait Upload
                 if(isset($this->actions['upload']['path'])) {
                     $this->forms[$key] = "/".$this->actions['upload']['path']."/".$filename;
                 } else {
-                    $this->forms[$key] = "/".$this->actions['table']."/".$filename;
+                    $this->forms[$key] = "/".$this->actions['table']['name']."/".$filename;
                 }
 
                 // 실제 경로로 이동
@@ -84,7 +84,7 @@ trait Upload
 
                 // uploadfile 테이블에 기록
                 DB::table('uploadfile')->updateOrInsert([
-                    'table' => $this->actions['table'],
+                    'table' => $this->actions['table']['name'],
                     'field' => $key
                 ]);
 
@@ -107,7 +107,7 @@ trait Upload
 
         // uploadfile 필드 조회
         /*
-        $fields = DB::table('uploadfile')->where('table', $this->actions['table'])->get();
+        $fields = DB::table('uploadfile')->where('table', $this->actions['table']['name'])->get();
         foreach($fields as $item) {
             $key = $item->field; // 업로드 필드명
             if($origin->$key != $this->forms[$key]) {
